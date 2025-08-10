@@ -1,0 +1,118 @@
+@charset "UTF-8";
+
+.dashboard-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+.dashboard-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 20px auto;
+    max-width: 1000px;
+    justify-content: center;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+    flex: 1 1 400px;
+    min-width: 100px;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    /* margin-bottom: 20px; */
+    margin: auto;
+    height: auto;
+}
+
+.chart-card h3 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.full-width {
+    flex: 1 1 100%;
+    max-width: 1000px;
+    height: auto;
+}
+
+/* Responsive Table */
+.responsive-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 600px; /* Ensures proper scroll on small screens */
+}
+
+.invoice-table th, .invoice-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
+}
+
+.invoice-table th {
+    background-color: #4e73df;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.invoice-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Charts */
+.chart-card canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+.status-paid, .status-pending, .status-overdue {
+    width: 100px;        /* fixed width */
+    margin: 10px auto;   /* vertical 10px, horizontal auto to center */
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+    display: block;      /* block makes width and margin:auto work */
+}
+
+.status-paid {
+    background-color: #28a745; /* Green background */
+    color: white;
+}
+
+.status-pending {
+    background-color: #ffc107; /* Yellow background */
+    color: white;
+}
+
+.status-overdue {
+    background-color: #dc3545; /* Red background */
+    color: white;
+}
+
+
+
