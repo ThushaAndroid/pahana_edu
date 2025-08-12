@@ -1,4 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="service.CustomerService" %>
+<%
+  
+    CustomerService customerService = new CustomerService();
+    String nextAccountNumber = customerService.generateNextAccountNumber();
+    System.out.println("newAccountNumber "+nextAccountNumber);
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,7 +16,7 @@
 </head>
 <body>
 <div class="top-card">
-    <h2>Customer Registration</h2>
+    <h2 class="top-title">Customer Registration</h2>
     </div>
 <div class="register-card">
 	 <h3 class="register-title">Register New Customer</h3>
@@ -18,7 +25,9 @@
         
 		<div class="form-group">
         <label for="accountNumber">Account Number:</label><br>
-        <input type="text" id="accountNumber" name="accountNumber" required>
+       <!--  <input type="text" id="accountNumber" name="accountNumber" required> -->
+         <input type="text" id="accountNumber" name="accountNumber" 
+           value="<%= nextAccountNumber %>" readonly>
 		</div>
 		
 		<div class="form-group">

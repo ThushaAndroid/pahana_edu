@@ -11,6 +11,31 @@ import model.Customer;
 
 public class CustomerService {
 	
+	public String generateNextAccountNumber() {
+	    String prefix = "CUST";
+	    String newAccountNumber = prefix + "001"; // default if no customers yet
+
+	    try (Connection conn = DBConnection.getConnection()) {
+	        String sql = "SELECT account_number FROM customers ORDER BY account_number DESC LIMIT 1";
+	        try (PreparedStatement ps = conn.prepareStatement(sql);
+	             ResultSet rs = ps.executeQuery()) {
+
+	            if (rs.next()) {
+	                String lastAcc = rs.getString("account_number"); // e.g., CUST005
+	                int lastNum = Integer.parseInt(lastAcc.replaceAll("\\D+", "")); // Extract number
+	                newAccountNumber = String.format("%s%03d", prefix, lastNum + 1); // CUST006
+	                
+	                
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace(); // log properly in real apps
+	    }
+
+	    return newAccountNumber;
+	}
+
+	
 	 // Add new customer
     public boolean addCustomer(Customer customer) {
         String sql = "INSERT INTO customers (account_number,nic, name, address, telephone,email) VALUES (?, ?, ?, ?, ?, ?)";

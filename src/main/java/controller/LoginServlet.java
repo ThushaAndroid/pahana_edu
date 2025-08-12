@@ -35,10 +35,15 @@ public class LoginServlet extends HttpServlet {
 	            request.getRequestDispatcher("login.jsp").forward(request, response);
 	            return;
 	        }
-
 	        try {
 	        	
-	        
+	        if (loginService.getActiveUserByUsername(username) == null) {
+				request.setAttribute("error", "User is not active!");
+				request.getRequestDispatcher("login.jsp").forward(request, response);
+				return;
+			}
+
+
 	        User user = loginService.authenticate(username, password);
 
 	        if (user != null) {

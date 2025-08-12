@@ -51,6 +51,24 @@
     	<description></description>
     	<servlet-class>controller.CustomerServlet</servlet-class>
     </servlet>
+    <servlet>
+    	<servlet-name>ItemServlet</servlet-name>
+    	<display-name>ItemServlet</display-name>
+    	<description></description>
+    	<servlet-class>controller.ItemServlet</servlet-class>
+    </servlet>
+    <servlet>
+    	<servlet-name>userReportServlet</servlet-name>
+    	<display-name>userReportServlet</display-name>
+    	<description></description>
+    	<servlet-class>controller.userReportServlet</servlet-class>
+    </servlet>
+    <servlet>
+    	<servlet-name>InvoiceServlet</servlet-name>
+    	<display-name>InvoiceServlet</display-name>
+    	<description></description>
+    	<servlet-class>controller.InvoiceServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
@@ -67,6 +85,18 @@
     <servlet-mapping>
     	<servlet-name>CustomerServlet</servlet-name>
     	<url-pattern>/CustomerServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    	<servlet-name>ItemServlet</servlet-name>
+    	<url-pattern>/ItemServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    	<servlet-name>userReportServlet</servlet-name>
+    	<url-pattern>/userReportS</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    	<servlet-name>InvoiceServlet</servlet-name>
+    	<url-pattern>/InvoiceSer</url-pattern>
     </servlet-mapping>
 </web-app>
 

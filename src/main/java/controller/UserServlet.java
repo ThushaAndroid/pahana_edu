@@ -1,11 +1,14 @@
 package controller;
 
 import java.io.IOException;
+import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import model.Item;
 import model.User;
 import service.UserService;
 
@@ -21,6 +24,31 @@ public class UserServlet extends HttpServlet {
 	    }
 
 	    @Override
+	    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+	            throws ServletException, IOException {
+	    	
+	    	 String action = request.getParameter("action");
+		        if (action == null) {
+		            action = "list";
+		        }
+
+		        switch (action) {
+		            case "update":
+						/* deleteItem(request, response); */
+		                break;
+		            default:
+		            	listUsers(request, response);
+		                break;
+		           
+		    			
+		        }
+	       
+	    }
+	       
+	   
+
+
+		@Override
 	    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 	            throws ServletException, IOException {
 
@@ -44,7 +72,7 @@ public class UserServlet extends HttpServlet {
 	        if (!username.matches(usernameRegex)) {
 	            request.setAttribute("error", "Username must be at least 4 characters and contain only letters and numbers.");
 	            request.setAttribute("mainContent", "userRegister.jsp");
-	            request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+	            request.getRequestDispatcher("userRegister.jsp").forward(request, response);
 	            return;
 	        }
 
@@ -52,7 +80,7 @@ public class UserServlet extends HttpServlet {
 	        if (!password.matches(passwordRegex)) {
 	            request.setAttribute("error", "Password must be at least 6 characters, with at least one letter and one number.");
 	            request.setAttribute("mainContent", "userRegister.jsp");
-	            request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+	            request.getRequestDispatcher("userRegister.jsp").forward(request, response);
 	            return;
 	        }
 
@@ -60,14 +88,14 @@ public class UserServlet extends HttpServlet {
 	        if (userService.getUserByUsername(username) != null) {
 	            request.setAttribute("error", "Username already exists!");
 	            request.setAttribute("mainContent", "userRegister.jsp");
-	            request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+	            request.getRequestDispatcher("userRegister.jsp").forward(request, response);
 	            return;
 	        }
 	        
 	        if (userService.getUserByPassword(password) != null) {
 	            request.setAttribute("error", "Password already exists!");
 	            request.setAttribute("mainContent", "userRegister.jsp");
-	            request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+	            request.getRequestDispatcher("userRegister.jsp").forward(request, response);
 	            return;
 	        }
 	        
@@ -84,15 +112,44 @@ public class UserServlet extends HttpServlet {
 	        }
 	        
 	        request.setAttribute("mainContent", "userRegister.jsp");
-	        request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+	        request.getRequestDispatcher("userRegister.jsp").forward(request, response);
 	       
 	    
 	        
 	    }catch (Exception e) {
             // 3️⃣ Database error handling
             request.setAttribute("error", "Database error: " + e.getMessage());
-            request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+            request.getRequestDispatcher("userRegister.jsp").forward(request, response);
             System.out.println("Database error: " + e.getMessage());
         }
 }
+		
+		
+		private void listUsers(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+			
+			
+			 try {
+			        List<User> users = userService.getAllUsers();
+			        
+			        // Debug print
+			        System.out.println("==== User List ====");
+			        for (User user : users) {
+			            System.out.println("Username: " + user.getUsername() + 
+			                             ", Password: " + user.getPassword() + 
+			                             ", Role: " + user.getRole() + 
+			                             ", Status: " + user.getStatus());
+			        }
+			        
+			        // Set attribute and forward
+			        request.setAttribute("users", users);
+			        request.getRequestDispatcher("userReport.jsp").forward(request, response);
+			        
+			    } catch (Exception e) {
+			        e.printStackTrace();
+			        request.setAttribute("error", "Error loading user data: " + e.getMessage());
+			        request.getRequestDispatcher("userReport.jsp").forward(request, response);
+			    }
+			
+		}
 }
