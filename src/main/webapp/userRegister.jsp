@@ -1,5 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-
+<%@ page import="service.UserService" %>
+<%
+  
+  UserService userService = new UserService();
+    String nextUserId = userService.generateNextUserId();
+    System.out.println("nextUserId "+nextUserId);
+%>
     
 <!DOCTYPE html>
 <html>
@@ -21,6 +27,11 @@
 <div class="register-card">
     <h3 class="register-title">Register New Account</h3>
     <form action="UserServlet" method="post">
+    <div class="form-group">
+    <label for="itemCode">User id:</label>
+    <input type="text" id="userId" name="userId"
+     value="<%= nextUserId %>" readonly>
+</div>
         <div class="form-group">
             <label>Username:</label>
             <input type="text" name="username" required>

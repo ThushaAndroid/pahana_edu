@@ -14,7 +14,7 @@
         List<User> userList = (List<User>) usersObj;
         System.out.println("Number of users: " + userList.size());
         for (User user : userList) {
-            System.out.println("User: " + user.getUsername() + ", " + user.getRole());
+            System.out.println("User: " + user.getUsername() + ", " + user.getStatus());
         }
     }
 %>
@@ -42,9 +42,10 @@
                             <th>User Name</th>
                             <th>Role</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
-                      <tbody>
+                    <%--   <tbody>
             <c:choose>
                 <c:when test="${not empty users}">
                     <c:forEach items="${users}" var="user">
@@ -61,7 +62,52 @@
                     </tr>
                 </c:otherwise>
             </c:choose>
-        </tbody>
+        </tbody> --%>
+         <tbody>
+        <%
+            List<User> users = (List<User>) request.getAttribute("users");
+            if (users != null && !users.isEmpty()) {
+                for (User u : users) {
+        %>
+        <tr>
+            <td><%= u.getUsername() %></td>
+            <td><%= u.getRole() %></td>
+            <td>
+    <form action="UserServlet" method="post" style="display:inline;" 
+          onsubmit="return confirm('Are you sure you want to <%= "Active".equalsIgnoreCase(u.getStatus()) ? "disable" : "active" %> this user?');">
+        <input type="hidden" name="action" value="status">
+        <input type="hidden" name="userId" value="<%= u.getUser_id() %>">
+        <button type="submit" 
+            class="status-btn <%= "Active".equalsIgnoreCase(u.getStatus()) ? "status-active" : "status-inactive" %>">
+            <%= u.getStatus() %>
+        </button>
+    </form>
+</td>
+
+            <td>
+        <form action="UserServlet" method="get" style="display:inline;">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="userId" value="<%= u.getUser_id() %>">
+            <%-- <input type="hidden" name="status" value="<%= u.getStatus() %>"> --%>
+            <button type="submit" class="action-btn edit-btn">Update</button>
+        </form>
+        <form action="UserServlet" method="post" style="display:inline;" 
+              onsubmit="return confirm('Are you sure you want to delete this user?');">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="userId" value="<%= u.getUser_id() %>">
+            <button type="submit" class="action-btn delete-btn">Delete</button>
+        </form>
+    </td>
+        </tr>
+        <% 
+                }
+            } else { 
+        %>
+        <tr>
+            <td colspan="3">No users found.</td>
+        </tr>
+        <% } %>
+    </tbody>
                 </table>
             </div>
         </div>

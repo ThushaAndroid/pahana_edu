@@ -82,6 +82,30 @@ public class ItemService {
 		    return null;
 		}
 	 
+	 public Item getItemByCode(String itemCode) {
+		    String sql = "SELECT * FROM items WHERE item_code = ?";
+		    try (Connection con = DBConnection.getConnection();
+		         PreparedStatement ps = con.prepareStatement(sql)) {
+
+		        ps.setString(1, itemCode);
+		        ResultSet rs = ps.executeQuery();
+
+		        if (rs.next()) {
+		            return new Item(
+		                rs.getString("item_code"),
+		                rs.getString("item_name"),
+		                rs.getString("description"),
+		                rs.getDouble("price"),
+		                rs.getInt("quantity")
+		            );
+		        }
+
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		    }
+		    return null;
+		}
+	 
 	 
 	 public boolean updateItem(Item item) {
 		    String sql = "UPDATE items SET item_name = ?, description = ?, price = ?, quantity = ? WHERE item_code = ?";

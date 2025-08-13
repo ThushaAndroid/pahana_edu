@@ -38,8 +38,8 @@ public class ItemServlet extends HttpServlet {
 	        }
 
 	        switch (action) {
-	            case "update":
-					/* deleteItem(request, response); */
+	            case "edit":
+					editItem(request, response); 
 	                break;
 	            default:
 	            	listItems(request, response);
@@ -63,6 +63,9 @@ public class ItemServlet extends HttpServlet {
         switch (action) {
             case "update":
                 updateItem(request, response);
+                break;
+            case "delete":
+//                deleteItem(request, response);
                 break;
             default:
                 insertItem(request, response);
@@ -143,6 +146,20 @@ public class ItemServlet extends HttpServlet {
 			System.out.println("Database error: " + e.getMessage());
 		}
     }
+    
+	private void editItem(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String itemCode = request.getParameter("itemCode");
+		Item item = itemService.getItemByCode(itemCode);
+		
+		 if (item != null) {
+			 request.setAttribute("item", item);
+				request.getRequestDispatcher("updateItem.jsp").forward(request, response);
+		    } else {
+		        request.setAttribute("error", "Item not found");
+		        listItems(request, response);
+		    }
+	}
 
     private void updateItem(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -162,14 +179,54 @@ public class ItemServlet extends HttpServlet {
         }
 
         Item item = new Item(itemCode, itemName, description, price, quantity);
-        boolean success = itemService.updateItem(item);
-
-        if (success) {
-            response.sendRedirect("itemsList.jsp");
+        try {
+        if (itemService.updateItem(item)) {
+            request.setAttribute("message", "Item updated successfully!");
         } else {
-            request.setAttribute("errorMessage", "Failed to update item.");
-            request.getRequestDispatcher("addItem.jsp").forward(request, response);
+            request.setAttribute("error", "Failed to update item.");
         }
+        
+        request.getRequestDispatcher("updateItem.jsp").forward(request, response);
+        
+    } catch (Exception e) {
+		// 3️⃣ Database error handling
+		request.setAttribute("error", "Database error: " + e.getMessage());
+		request.getRequestDispatcher("addItem.jsp").forward(request, response);
+		System.out.println("Database error: " + e.getMessage());
+	}
     }
+    
+//    private void deleteItem(HttpServletRequest request, HttpServletResponse response)
+//	        throws ServletException, IOException {
+//	    
+//	    String accountNumber = request.getParameter("accountNumber");
+//
+//	    if (accountNumber == null || accountNumber.trim().isEmpty()) {
+//	        request.setAttribute("error", "Invalid account number.");
+//	    } else {
+//	    	
+//	    	try {
+//	        boolean deleted = itemService.deleteCustomer(accountNumber);
+//	        if (deleted) {
+//	            request.setAttribute("message", "Customer deleted successfully!");
+//	        } else {
+//	            request.setAttribute("error", "Failed to delete customer. Customer may not exist.");
+//	        }
+//	        
+//	    	   } catch (Exception e) {
+//			        e.printStackTrace();
+//			        request.setAttribute("error", "Error deleting user: " + e.getMessage());
+//			        request.getRequestDispatcher("userReport.jsp").forward(request, response);
+//			        System.out.println("Error deleting customer: " + e.getMessage());
+//			    }
+//	    }
+//
+//	    // Reload updated customer list
+//	    List<Item> customers = itemService.getAllCustomers();
+//	    request.setAttribute("customers", customers);
+//
+//	    // Forward to JSP
+//	    request.getRequestDispatcher("customerReport.jsp").forward(request, response);
+//	}
 
 }

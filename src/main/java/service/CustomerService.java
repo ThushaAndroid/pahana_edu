@@ -114,15 +114,16 @@ public class CustomerService {
 
     // Update customer
     public boolean updateCustomer(Customer customer) {
-        String sql = "UPDATE customers SET name=?, address=?, telephone=?, units_consumed=? WHERE account_number=?";
+        String sql = "UPDATE customers SET nic=?, name=?, address=?, telephone=?, email=? WHERE account_number=?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, customer.getName());
-            ps.setString(2, customer.getAddress());
-            ps.setString(3, customer.getTelephone());
-            ps.setInt(4, customer.getUnitsConsumed());
-            ps.setString(5, customer.getAccountNumber());
+        	
+        	ps.setString(1, customer.getNic());
+            ps.setString(2, customer.getName());
+            ps.setString(3, customer.getAddress());
+            ps.setString(4, customer.getTelephone());
+            ps.setString(5, customer.getEmail());
+            ps.setString(6, customer.getAccountNumber());
 
             return ps.executeUpdate() > 0;
 
@@ -159,11 +160,12 @@ public class CustomerService {
             while (rs.next()) {
                 customers.add(new Customer(
                         rs.getString("account_number"),
+                        rs.getString("nic"),
                         rs.getString("name"),
                         rs.getString("address"),
                         rs.getString("telephone"),
-                        rs.getString("nic"),
-                        rs.getString("email")                   
+                        rs.getString("email"),
+                        rs.getInt("units_consumed") 
                     ));
             }
 

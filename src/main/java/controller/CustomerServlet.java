@@ -48,12 +48,10 @@ public class CustomerServlet extends HttpServlet {
 
 		switch (action) {
 		case "edit":
-			getCustomerForEdit(request, response);
+			editCustomer(request, response);
 			break;
-		case "delete":
-			deleteCustomer(request, response);
-			break;
-		case "list":
+		
+		/* case "list": */
 		default:
 			listCustomers(request, response);
 			break;
@@ -74,6 +72,9 @@ public class CustomerServlet extends HttpServlet {
 		switch (action) {
 		case "update":
 			updateCustomer(request, response);
+			break;
+		case "delete":
+			deleteCustomer(request, response);
 			break;
 		case "insert":
 		default:
@@ -162,33 +163,83 @@ public class CustomerServlet extends HttpServlet {
 
 	}
 
-	private void getCustomerForEdit(HttpServletRequest request, HttpServletResponse response)
+	private void editCustomer(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String accountNumber = request.getParameter("accountNumber");
 		Customer existingCustomer = customerService.getCustomerByAccount(accountNumber);
-		request.setAttribute("customer", existingCustomer);
-		request.getRequestDispatcher("customerForm.jsp").forward(request, response);
+		
+		 if (accountNumber != null) {
+			 request.setAttribute("customer", existingCustomer);
+				request.getRequestDispatcher("updateCustomer.jsp").forward(request, response);
+		    } else {
+		        request.setAttribute("error", "Customer not found");
+		        listCustomers(request, response);
+		    }
 	}
 
-	private void updateCustomer(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void updateCustomer(HttpServletRequest request, HttpServletResponse response) throws ServletException,IOException {
 		String accountNumber = request.getParameter("accountNumber");
+		String nic = request.getParameter("nic");
 		String name = request.getParameter("name");
 		String address = request.getParameter("address");
 		String telephone = request.getParameter("telephone");
-		String nic = request.getParameter("nic");
 		String email = request.getParameter("email");
-		int unitsConsumed = Integer.parseInt(request.getParameter("unitsConsumed"));
+//		int unitsConsumed = Integer.parseInt(request.getParameter("unitsConsumed"));
 
-		Customer customer = new Customer(accountNumber, name, address, telephone, nic, email);
-		customerService.updateCustomer(customer);
+		try {
 
-		response.sendRedirect("customer?action=list");
+		Customer customer = new Customer(accountNumber, nic, name, address, telephone, email);
+		if(customerService.updateCustomer(customer)) {
+			request.setAttribute("message", "Customer update successful!");
+			System.out.println("Customer update successful!");
+
+		} else {
+			request.setAttribute("error", "Error occurred during registration.");
+			System.out.println("Error occurred during updating.");
+		}
+
+		request.getRequestDispatcher("updateCustomer.jsp").forward(request, response);
+		} catch (Exception e) {
+			// 3️⃣ Database error handling
+			request.setAttribute("error", "Database error: " + e.getMessage());
+			request.getRequestDispatcher("updateCustomer.js").forward(request, response);
+			System.out.println("Database error: " + e.getMessage());
+		}
+		/* response.sendRedirect("customer?action=list"); */
 	}
 
-	private void deleteCustomer(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String accountNumber = request.getParameter("accountNumber");
-		customerService.deleteCustomer(accountNumber);
-		response.sendRedirect("customer?action=list");
+	private void deleteCustomer(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+	    
+	    String accountNumber = request.getParameter("accountNumber");
+
+	    if (accountNumber == null || accountNumber.trim().isEmpty()) {
+	        request.setAttribute("error", "Invalid account number.");
+	    } else {
+	    	
+	    	try {
+	        boolean deleted = customerService.deleteCustomer(accountNumber);
+	        if (deleted) {
+	            request.setAttribute("message", "Customer deleted successfully!");
+	        } else {
+	            request.setAttribute("error", "Failed to delete customer. Customer may not exist.");
+	        }
+	        
+	    	   } catch (Exception e) {
+			        e.printStackTrace();
+			        request.setAttribute("error", "Error deleting user: " + e.getMessage());
+			        request.getRequestDispatcher("userReport.jsp").forward(request, response);
+			        System.out.println("Error deleting customer: " + e.getMessage());
+			    }
+	    }
+
+	    // Reload updated customer list
+	    List<Customer> customers = customerService.getAllCustomers();
+	    request.setAttribute("customers", customers);
+
+	    // Forward to JSP
+	    request.getRequestDispatcher("customerReport.jsp").forward(request, response);
 	}
+
 
 }

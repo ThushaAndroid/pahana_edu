@@ -43,9 +43,10 @@
                             <th>Date</th>
                             <th>Amount</th>
                             <th>Balance</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
-                      <tbody>
+                     <%--  <tbody>
             <c:choose>
                 <c:when test="${not empty invoices}">
                     <c:forEach items="${invoices}" var="invoice">
@@ -63,7 +64,43 @@
                     </tr>
                 </c:otherwise>
             </c:choose>
-        </tbody>
+        </tbody> --%>
+        
+         <tbody>
+        <%
+        List<Invoice> invoices = (List<Invoice>) request.getAttribute("invoices");;
+            if (invoices != null && !invoices.isEmpty()) {
+                for (Invoice i : invoices) {
+        %>
+        <tr>
+            <td><%= i.getInvoiceNo()%></td>
+            <td><%= i.getDate() %></td>
+            <td><%= i.getAmount() %></td>
+            <td><%= i.getBalance() %></td>
+         <td>
+        <form action="UserServlet" method="post" style="display:inline;">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="username" value="<%= i.getInvoiceNo() %>">
+            <button type="submit" class="action-btn edit-btn">Update</button>
+        </form>
+        <form action="UserServlet" method="post" style="display:inline;" 
+              onsubmit="return confirm('Are you sure you want to delete this invoice?');">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="username" value="<%= i.getInvoiceNo() %>">
+            <button type="submit" class="action-btn delete-btn">Delete</button>
+        </form>
+    </td>
+           
+        </tr>
+        <% 
+                }
+            } else { 
+        %>
+        <tr>
+            <td colspan="3">No items found.</td>
+        </tr>
+        <% } %>
+    </tbody>
                 </table>
             </div>
         </div>

@@ -34,7 +34,7 @@
 </div>
 <div class="form-group">
     <label for="description">Description:</label><br>
-    <textarea id="descriptio" name="description" rows="3" required></textarea>
+    <textarea id="description" name="description" rows="3" required></textarea>
 </div>
 <div class="form-group">
     <label for="price">Price:</label><br>

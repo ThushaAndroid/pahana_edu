@@ -44,10 +44,11 @@
                             <th>Description</th>
                             <th>price</th>
                             <th>Quantity</th>
+                            <th>Action</th>
                             
                         </tr>
                     </thead>
-                      <tbody>
+                     <%--  <tbody>
             <c:choose>
                 <c:when test="${not empty items}">
                     <c:forEach items="${items}" var="item">
@@ -68,7 +69,43 @@
                 </c:otherwise>
                 
             </c:choose>
-        </tbody>
+        </tbody> --%>
+          <tbody>
+        <%
+        List<Item> items = (List<Item>) request.getAttribute("items");;
+            if (items != null && !items.isEmpty()) {
+                for (Item i : items) {
+        %>
+        <tr>
+            <td><%= i.getItemCode()%></td>
+            <td><%= i.getItemName() %></td>
+            <td><%= i.getDescription() %></td>
+            <td><%= i.getPrice() %></td>
+            <td><%= i.getQuantity() %></td>
+               <td>
+        <form action="ItemServlet" method="get" style="display:inline;">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="itemCode" value="<%= i.getItemCode() %>">
+            <button type="submit" class="action-btn edit-btn">Update</button>
+        </form>
+        <form action="ItemServlet" method="post" style="display:inline;" 
+              onsubmit="return confirm('Are you sure you want to delete this item?');">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="itemCode" value="<%= i.getItemCode() %>">
+            <button type="submit" class="action-btn delete-btn">Delete</button>
+        </form>
+    </td>
+           
+        </tr>
+        <% 
+                }
+            } else { 
+        %>
+        <tr>
+            <td colspan="3">No items found.</td>
+        </tr>
+        <% } %>
+    </tbody>
                 </table>
             </div>
         </div>

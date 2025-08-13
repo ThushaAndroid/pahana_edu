@@ -46,10 +46,11 @@
                             <th>Telephone</th>
                             <th>Email</th>
                             <th>Units Consumed</th>
+                            <th>Action</th>
                             
                         </tr>
                     </thead>
-                      <tbody>
+                     <%--  <tbody>
             <c:choose>
                 <c:when test="${not empty customers}">
                     <c:forEach items="${customers}" var="customer">
@@ -71,7 +72,44 @@
                     </tr>
                 </c:otherwise>
             </c:choose>
-        </tbody>
+        </tbody> --%>
+          <tbody>
+        <%
+        List<Customer> customers = (List<Customer>) request.getAttribute("customers");;
+            if (customers != null && !customers.isEmpty()) {
+                for (Customer c : customers) {
+        %>
+        <tr>
+            <td><%= c.getAccountNumber()%></td>
+            <td><%= c.getNic() %></td>
+            <td><%= c.getName() %></td>
+            <td><%= c.getAddress() %></td>
+            <td><%= c.getTelephone() %></td>
+            <td><%= c.getEmail() %></td>
+            <td><%= c.getUnitsConsumed() %></td>
+             <td>
+        <form action="CustomerServlet" method="get" style="display:inline;">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="accountNumber" value="<%= c.getAccountNumber() %>">
+            <button type="submit" class="action-btn edit-btn">Update</button>
+        </form>
+        <form action="CustomerServlet" method="post" style="display:inline;" 
+              onsubmit="return confirm('Are you sure you want to delete this customer?');">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="accountNumber" value="<%= c.getAccountNumber() %>">
+            <button type="submit" class="action-btn delete-btn">Delete</button>
+        </form>
+    </td>
+        </tr>
+        <% 
+                }
+            } else { 
+        %>
+        <tr>
+            <td colspan="3">No customers found.</td>
+        </tr>
+        <% } %>
+    </tbody>
                 </table>
             </div>
         </div>

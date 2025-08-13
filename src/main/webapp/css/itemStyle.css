@@ -1,11 +1,15 @@
 @charset "UTF-8";
 
+body {
+    font-family: Arial, sans-serif;
+   
+}
 .top-card {
     background: white;
     border-radius: 8px;
     box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
     overflow: hidden;
-    max-width: 1000px;
+    max-width: 100%;
     margin: auto;
     padding: 20px;
 }
@@ -22,7 +26,7 @@
     background: white;
     border-radius: 8px;
     box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-    max-width: 1000px;
+    max-width: 100%;
     /* margin: 0 auto 40px auto; */
     margin: 20px auto;
     padding: 20px;
@@ -83,7 +87,7 @@ button:hover {
     color: red;
 }
 
-textarea#descriptio {
+textarea#description {
     width: 100%;       /* makes textarea full width of its container */
    /*  max-width: 400px;  optional max width */
     box-sizing: border-box; /* include padding and border in width */
