@@ -52,7 +52,7 @@
                value="<%=item != null? item.getQuantity():"" %>" required>
     </div>
 
-    <button type="submit">Update</button>
+    <button type="submit">Update item</button>
 </form>
 
 

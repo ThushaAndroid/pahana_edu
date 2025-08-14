@@ -71,6 +71,7 @@ a:hover {
     left: 0;
     padding: 15px;
     overflow-y: auto; /* Scroll only sidebar if menu is long */
+   
 }
 
 .sidebar h3 {
@@ -128,7 +129,7 @@ a:hover {
 }
 
 .space {
-    height: 40px; /* space height */
+    height: 20px; /* space height */
 }
 /* ===== Main Content ===== */
 .main-content {

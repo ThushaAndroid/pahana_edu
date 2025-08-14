@@ -24,6 +24,8 @@
 <head>
     <title>User Report</title>
     <link rel="stylesheet" href="css/reportStyle.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <div class="top-card">
@@ -111,7 +113,37 @@
                 </table>
             </div>
         </div>
-    </div>
+    <     <%
+    String error = (String) request.getAttribute("error");
+    String message = (String) request.getAttribute("message");
+%>
+</div>
+
+<script>
+    <% if (error != null) { %>
+    Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'error',
+        title: "<%= error.replace("\"", "\\\"") %>",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true
+    });
+    <% } %>
+
+    <% if (message != null) { %>
+    Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'success',
+        title: "<%= message.replace("\"", "\\\"") %>",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true
+    });
+    <% } %>
+</script>
 
 </body>
 </html>

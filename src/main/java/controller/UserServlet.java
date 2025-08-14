@@ -252,7 +252,8 @@ public class UserServlet extends HttpServlet {
 		
 		private void editUser(HttpServletRequest request, HttpServletResponse response)
 		        throws ServletException, IOException {
-		    String userId = request.getParameter("userId");
+		    try {
+			String userId = request.getParameter("userId");
 		    User user = userService.getUserById(userId);
 
 		    if (user != null) {
@@ -261,6 +262,11 @@ public class UserServlet extends HttpServlet {
 		    } else {
 		        request.setAttribute("error", "User not found");
 		        listUsers(request, response);
+		    }
+		 } catch (Exception e) {
+		        e.printStackTrace();
+		        request.setAttribute("error", "Error loading user id: " + e.getMessage());
+		        request.getRequestDispatcher("updateUser.jsp").forward(request, response);
 		    }
 		}
 		

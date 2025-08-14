@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+
 import model.Customer;
 import model.Item;
 import service.CustomerService;
@@ -41,6 +43,9 @@ public class ItemServlet extends HttpServlet {
 	            case "edit":
 					editItem(request, response); 
 	                break;
+	            case "search":
+	    			searchItem(request, response);
+	    			break;
 	            default:
 	            	listItems(request, response);
 	                break;
@@ -65,7 +70,7 @@ public class ItemServlet extends HttpServlet {
                 updateItem(request, response);
                 break;
             case "delete":
-//                deleteItem(request, response);
+                deleteItem(request, response);
                 break;
             default:
                 insertItem(request, response);
@@ -149,6 +154,8 @@ public class ItemServlet extends HttpServlet {
     
 	private void editItem(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
+		try {
 		String itemCode = request.getParameter("itemCode");
 		Item item = itemService.getItemByCode(itemCode);
 		
@@ -159,6 +166,11 @@ public class ItemServlet extends HttpServlet {
 		        request.setAttribute("error", "Item not found");
 		        listItems(request, response);
 		    }
+	 } catch (Exception e) {
+	        e.printStackTrace();
+	        request.setAttribute("error", "Error loading item code: " + e.getMessage());
+	        request.getRequestDispatcher("updateItem.jsp").forward(request, response);
+	    }
 	}
 
     private void updateItem(HttpServletRequest request, HttpServletResponse response)
@@ -174,7 +186,8 @@ public class ItemServlet extends HttpServlet {
             quantity = Integer.parseInt(request.getParameter("quantity"));
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "Invalid price or quantity format.");
-            request.getRequestDispatcher("addItem.jsp").forward(request, response);
+            request.getRequestDispatcher("updateItem.jsp").forward(request, response);
+            System.out.println("Invalid price or quantity format.");
             return;
         }
 
@@ -182,8 +195,10 @@ public class ItemServlet extends HttpServlet {
         try {
         if (itemService.updateItem(item)) {
             request.setAttribute("message", "Item updated successfully!");
+            System.out.println("Item updated successfully!");
         } else {
             request.setAttribute("error", "Failed to update item.");
+            System.out.println("Failed to update item.");
         }
         
         request.getRequestDispatcher("updateItem.jsp").forward(request, response);
@@ -191,42 +206,64 @@ public class ItemServlet extends HttpServlet {
     } catch (Exception e) {
 		// 3️⃣ Database error handling
 		request.setAttribute("error", "Database error: " + e.getMessage());
-		request.getRequestDispatcher("addItem.jsp").forward(request, response);
+		request.getRequestDispatcher("updateItem.jsp").forward(request, response);
 		System.out.println("Database error: " + e.getMessage());
 	}
     }
     
-//    private void deleteItem(HttpServletRequest request, HttpServletResponse response)
-//	        throws ServletException, IOException {
-//	    
-//	    String accountNumber = request.getParameter("accountNumber");
-//
-//	    if (accountNumber == null || accountNumber.trim().isEmpty()) {
-//	        request.setAttribute("error", "Invalid account number.");
-//	    } else {
-//	    	
-//	    	try {
-//	        boolean deleted = itemService.deleteCustomer(accountNumber);
-//	        if (deleted) {
-//	            request.setAttribute("message", "Customer deleted successfully!");
-//	        } else {
-//	            request.setAttribute("error", "Failed to delete customer. Customer may not exist.");
-//	        }
-//	        
-//	    	   } catch (Exception e) {
-//			        e.printStackTrace();
-//			        request.setAttribute("error", "Error deleting user: " + e.getMessage());
-//			        request.getRequestDispatcher("userReport.jsp").forward(request, response);
-//			        System.out.println("Error deleting customer: " + e.getMessage());
-//			    }
-//	    }
-//
-//	    // Reload updated customer list
-//	    List<Item> customers = itemService.getAllCustomers();
-//	    request.setAttribute("customers", customers);
-//
-//	    // Forward to JSP
-//	    request.getRequestDispatcher("customerReport.jsp").forward(request, response);
-//	}
+    private void deleteItem(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+	    
+	    String itemCode = request.getParameter("itemCode");
+
+	    if (itemCode == null || itemCode.trim().isEmpty()) {
+	        request.setAttribute("error", "Invalid account number.");
+	    } else {
+	    	
+	    	try {
+	        boolean deleted = itemService.deleteItem(itemCode);
+	        if (deleted) {
+	            request.setAttribute("message", "Item deleted successfully!");
+	        } else {
+	            request.setAttribute("error", "Failed to delete item. Item may not exist.");
+	        }
+	        
+	    	   } catch (Exception e) {
+			        e.printStackTrace();
+			        request.setAttribute("error", "Error deleting item: " + e.getMessage());
+			        request.getRequestDispatcher("itemReport.jsp").forward(request, response);
+			        System.out.println("Error deleting itemr: " + e.getMessage());
+			    }
+	    }
+
+	    // Reload updated item list
+	    List<Item>items = itemService.getAllItems();
+	    request.setAttribute("items", items);
+
+	    // Forward to JSP
+	    request.getRequestDispatcher("itemReport.jsp").forward(request, response);
+	}
+    
+	private void searchItem(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+
+	    try {
+	        String query = request.getParameter("query");
+	        List<Item> items = itemService.searchItems(query);
+
+	        response.setContentType("application/json");
+	        response.setCharacterEncoding("UTF-8");
+
+	        // Convert list to JSON
+	        String json = new Gson().toJson(items);
+	        response.getWriter().write(json);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setContentType("application/json");
+	        response.setCharacterEncoding("UTF-8");
+	        response.getWriter().write("[]"); // return empty array if error
+	    }
+	}
 
 }

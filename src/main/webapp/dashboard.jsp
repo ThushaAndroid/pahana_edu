@@ -101,10 +101,16 @@
     </div>
 
     <!-- Transaction Menu -->
-    <button onclick="toggleMenu('transactionMenu')">Transaction</button>
+    <button onclick="toggleMenu('transactionMenu')">Invoice</button>
     <div id="transactionMenu" style="padding-left:10px;">
-        <a href="#" class="button-link">View Bills</a>
-        <a href="#" class="button-link">Generate Bill</a>
+    <form action="InvoiceServlet" method="get">
+     <input type="hidden" name="action" value="invoice">
+            <button type="submit" class="btn">Generate Bill</button>
+        </form>
+    <!-- <a href="generateInvoice.jsp" class="button-link">Generate Invoice</a> -->
+   
+       <!--  <a href="#" class="button-link">View Bills</a>
+        <a href="#" class="button-link">Generate Bill</a> -->
     </div>
 
     <% if ("Admin".equals(roleName)) { %>
@@ -133,7 +139,13 @@
             <button type="submit" class="btn">Invoice Report</button>
         </form>
     </div>
+    
+    <div class="space">
+   
+    </div>
 </div>
+
+
 
 <!-- Main Content -->
 <div class="main-content">

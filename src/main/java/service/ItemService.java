@@ -128,6 +128,21 @@ public class ItemService {
 		}
 	 
 	 
+	 public boolean deleteItem(String itemCode) {
+		    String sql = "DELETE FROM items WHERE item_code=?";
+		    try (Connection con = DBConnection.getConnection();
+		         PreparedStatement ps = con.prepareStatement(sql)) {
+
+		        ps.setString(1, itemCode);
+		        return ps.executeUpdate() > 0;
+
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		    }
+		    return false;
+		}
+	 
+	 
 	    public List<Item> getAllItems() {
 	        List<Item> items = new ArrayList<>();
 	        String sql = "SELECT * FROM items";
@@ -147,6 +162,34 @@ public class ItemService {
 	            
 	            }
 
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        return items;
+	    }
+
+	    public List<Item> searchItems(String query) {
+	        List<Item> items = new ArrayList<>();
+	        String sql = "SELECT * FROM items WHERE item_name LIKE ? OR description LIKE ?";
+
+	        try (Connection conn = DBConnection.getConnection();
+	             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	            String searchTerm = "%" + query + "%";
+	            ps.setString(1, searchTerm);
+	            ps.setString(2, searchTerm);
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) {
+	                    items.add(new Item(
+	                        rs.getString("item_code"),
+	                        rs.getString("item_name"),
+	                        rs.getString("description"),
+	                        rs.getDouble("price"),
+	                        rs.getInt("quantity")
+	                    ));
+	                }
+	            }
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }

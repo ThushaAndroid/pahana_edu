@@ -70,6 +70,7 @@
     	<servlet-class>controller.InvoiceServlet</servlet-class>
     </servlet>
 
+
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -98,6 +99,7 @@
     	<servlet-name>InvoiceServlet</servlet-name>
     	<url-pattern>/InvoiceSer</url-pattern>
     </servlet-mapping>
+   
 </web-app>
 
 

@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+
 import model.Customer;
 import model.User;
 import service.CustomerService;
@@ -50,8 +52,9 @@ public class CustomerServlet extends HttpServlet {
 		case "edit":
 			editCustomer(request, response);
 			break;
-		
-		/* case "list": */
+		case "search":
+			searchCustomer(request, response);
+			break;
 		default:
 			listCustomers(request, response);
 			break;
@@ -82,6 +85,8 @@ public class CustomerServlet extends HttpServlet {
 			break;
 		}
 	}
+	
+	
 
 	private void listCustomers(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -165,6 +170,7 @@ public class CustomerServlet extends HttpServlet {
 
 	private void editCustomer(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		try {
 		String accountNumber = request.getParameter("accountNumber");
 		Customer existingCustomer = customerService.getCustomerByAccount(accountNumber);
 		
@@ -175,6 +181,11 @@ public class CustomerServlet extends HttpServlet {
 		        request.setAttribute("error", "Customer not found");
 		        listCustomers(request, response);
 		    }
+	 } catch (Exception e) {
+	        e.printStackTrace();
+	        request.setAttribute("error", "Error loading account number: " + e.getMessage());
+	        request.getRequestDispatcher("updateCustomer.jsp").forward(request, response);
+	    }
 	}
 
 	private void updateCustomer(HttpServletRequest request, HttpServletResponse response) throws ServletException,IOException {
@@ -240,6 +251,30 @@ public class CustomerServlet extends HttpServlet {
 	    // Forward to JSP
 	    request.getRequestDispatcher("customerReport.jsp").forward(request, response);
 	}
+	
+	
+	private void searchCustomer(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+
+	    try {
+	        String query = request.getParameter("query");
+	        List<Customer> customers = customerService.searchCustomers(query);
+
+	        response.setContentType("application/json");
+	        response.setCharacterEncoding("UTF-8");
+
+	        // Convert list to JSON
+	        String json = new Gson().toJson(customers);
+	        response.getWriter().write(json);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setContentType("application/json");
+	        response.setCharacterEncoding("UTF-8");
+	        response.getWriter().write("[]"); // return empty array if error
+	    }
+	}
+
 
 
 }

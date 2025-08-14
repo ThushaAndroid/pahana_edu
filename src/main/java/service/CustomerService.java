@@ -174,5 +174,39 @@ public class CustomerService {
         }
         return customers;
     }
+    
+    
+    // Search customers by name or email
+    public List<Customer> searchCustomers(String query) {
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT * FROM customers WHERE name LIKE ? OR email LIKE ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            String searchTerm = "%" + query + "%";
+            ps.setString(1, searchTerm);
+            ps.setString(2, searchTerm);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                	customers.add(new Customer(
+                            rs.getString("account_number"),
+                            rs.getString("nic"),
+                            rs.getString("name"),
+                            rs.getString("address"),
+                            rs.getString("telephone"),
+                            rs.getString("email"),
+                            rs.getInt("units_consumed") 
+                			 ));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return customers;
+    }
 
 }
