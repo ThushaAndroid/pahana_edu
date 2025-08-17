@@ -92,7 +92,7 @@
 
         <div class="form-group">
             <label for="dueDate">Due Date:</label><br>
-            <input type="date" id="dueDate" name="dueDate" required>
+            <input type="date" id="dueDate" name="dueDate">
         </div>
         
           <div class="form-group">
@@ -115,14 +115,14 @@
             <input type="number" step="0.01" id="balance" name="balance" readonly>
         </div>
 
-        <div class="form-group">
+     <!--    <div class="form-group">
             <label for="status">Status:</label><br>
             <select id="status" name="status" required>
                 <option value="Pending">Pending</option>
                 <option value="Paid">Paid</option>
-                <!-- <option value="Cancelled">Cancelled</option> -->
+                <option value="Cancelled">Cancelled</option>
             </select>
-        </div>
+        </div> -->
 
         <button type="submit" class="btn">Generate</button>
     </form>
@@ -271,11 +271,11 @@ document.addEventListener('DOMContentLoaded', function() {
     	    row.dataset.code = item.code;
 
     	    row.innerHTML = `
-    	        <td>${item.code}</td>
-    	        <td>${item.name}</td>
-    	        <td>${item.desc}</td>
-    	        <td>${parseFloat(item.price).toFixed(2)}</td>
-    	        <td><input type="number" min="1" max="${item.qty}" value="1" class="buyQty"></td>
+    	        <td>${item.code} <input type="hidden" name="item_code[]" value="${item.code}"></td>
+    	        <td>${item.name} <input type="hidden" name="item_name[]" value="${item.name}"></td>
+    	        <td>${item.desc} <input type="hidden" name="description[]" value="${item.desc}"></td>
+    	        <td>${parseFloat(item.price).toFixed(2)}  <input type="hidden" name="price[]" value="${item.price}"></td>
+    	        <td><input type="number" min="1" max="${item.qty}" value="1" class="buyQty" name="quantity[]"></td>
     	        <td class="total">${parseFloat(item.price).toFixed(2)}</td>
     	        <td><button type="button" class="removeBtn">Remove</button></td>
     	    `;
@@ -305,6 +305,14 @@ document.addEventListener('DOMContentLoaded', function() {
     	        total += price * qty;
     	    });
     	    document.getElementById('totalAmount').value = total.toFixed(2);
+    	    
+    	    const cash = parseFloat(document.getElementById('cash').value) || 0;
+
+    	    // Update balance
+    	    const balance = cash-total;
+    	    document.getElementById('balance').value = balance.toFixed(2);
+    	    originalAmount = total;
+    	   
     	}
 
     	// Call updateTotal whenever quantity changes
@@ -327,19 +335,52 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-const discountInput = document.getElementById('discount');
+
+/* const discountInput = document.getElementById('discount');
 const totalAmountInput = document.getElementById('totalAmount');
 
 discountInput.addEventListener('input', () => {
-    const totalAmount = parseFloat(totalAmountInputt.value) || 0;  
+    const totalAmount = parseFloat(totalAmountInput.value) || 0;  
     const discount = parseFloat(discountInput.value) || 0; 
 
     const newTotalAmount = totalAmount - discount;
 
     totalAmountInput.value = newTotalAmount.toFixed(2);
+}); */
+const discountInput = document.getElementById('discount');
+const totalAmountInput = document.getElementById('totalAmount');
+
+
+let originalAmount = 0; // Use 'let' instead of 'const' so it can be updated
+//let originalBalance = 0;
+
+// Calculate discounted amount when discount is entered
+discountInput.addEventListener('input', function() {
+    const discount = parseFloat(discountInput.value) || 0;
+    
+    const newTotalAmount = originalAmount - discount;
+
+    const finalAmount = Math.max(0, newTotalAmount);
+    
+    totalAmountInput.value = finalAmount.toFixed(2);
+    
+    balance();
 });
 
+function balance() {
+    const balanceDisInput = document.getElementById('balance');
+    const cash = parseFloat(document.getElementById('cash').value) || 0;
+    const total = parseFloat(document.getElementById('totalAmount').value) || 0;
+    const discount = parseFloat(document.getElementById('discount').value) || 0;
 
+    // final amount after discount
+   /*  const finalTotal = Math.max(0, total - discount); */
+
+    // balance = cash - final total
+    const newBalance = cash - total;
+
+    balanceDisInput.value = newBalance.toFixed(2);
+}
 
 const cashInput = document.getElementById('cash');
 const balanceInput = document.getElementById('balance');

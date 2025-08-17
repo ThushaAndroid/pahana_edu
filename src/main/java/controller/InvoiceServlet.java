@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -9,10 +10,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import model.BillDetail;
 import model.Customer;
 import model.Invoice;
 import model.Item;
 import model.User;
+import service.BillDetailService;
 import service.CustomerService;
 import service.InvoiceService;
 import service.ItemService;
@@ -27,6 +30,9 @@ public class InvoiceServlet extends HttpServlet {
 	 private InvoiceService invoiceService;
 	 private ItemService itemService;
 	 private CustomerService customerService;
+	 private BillDetailService billService;
+	
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -34,6 +40,7 @@ public class InvoiceServlet extends HttpServlet {
         super();
         invoiceService = new InvoiceService();
         itemService = new ItemService();
+        billService = new BillDetailService();
         // TODO Auto-generated constructor stub
     }
 
@@ -120,43 +127,116 @@ public class InvoiceServlet extends HttpServlet {
 	}
 	
 	
-	private void insertInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+	private void insertInvoice(HttpServletRequest request, HttpServletResponse response) 
+	        throws IOException, ServletException {
+		
+		  
 	    try {
-	        Invoice invoice = new Invoice();
-	        invoice.setInvoiceNo(request.getParameter("invoiceNo"));
-	        invoice.setCustomerName(request.getParameter("customerName"));
-	        invoice.setInvoiceDate(java.sql.Date.valueOf(request.getParameter("invoiceDate")));
-	        invoice.setDueDate(java.sql.Date.valueOf(request.getParameter("dueDate")));
-	        invoice.setTotalAmount(Double.parseDouble(request.getParameter("totalAmount")));
-	        invoice.setBalance(Double.parseDouble(request.getParameter("balance")));
-	        invoice.setStatus(request.getParameter("status"));
+	        // Load all parameters from request
+	        String invoiceNo = request.getParameter("invoiceNo");
+	        String customerName = request.getParameter("customerName");
+	        Date invoiceDate = java.sql.Date.valueOf(request.getParameter("invoiceDate"));
+//	        Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
+	        String dueDateStr = request.getParameter("dueDate");
+	        java.sql.Date dueDate;
+
+	        if (dueDateStr != null && !dueDateStr.isEmpty()) {
+	            dueDate = java.sql.Date.valueOf(dueDateStr); // format must be "yyyy-MM-dd"
+	        } else {
+	            dueDate = new java.sql.Date(System.currentTimeMillis()); // use current date if null/empty
+	        }
+
+	        double discount = Double.parseDouble(request.getParameter("discount"));
+	        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
+	        double cash = Double.parseDouble(request.getParameter("cash"));
+	        double balance = Double.parseDouble(request.getParameter("balance"));
+	        String status = "Pending";
+	        
+	        if(totalAmount>=cash) {
+	        	status = "Paid";
+	        }
+	       
+	      
+	        
+	        // Create Invoice using full constructor
+	        Invoice invoice = new Invoice(invoiceNo, customerName, invoiceDate, dueDate,
+	                                      discount, totalAmount, cash, balance, status);
 
 	        if (invoiceService.insertInvoice(invoice)) {
-	            response.sendRedirect("InvoiceServlet?action=list");
-	        } else {
-	            request.setAttribute("error", "Failed to insert invoice.");
-	            request.getRequestDispatcher("invoiceForm.jsp").forward(request, response);
+	        	
+	        	  // 3. Collect item details arrays from request
+	            String[] itemCodes = request.getParameterValues("item_code[]");
+	            String[] itemNames = request.getParameterValues("item_name[]");
+	            String[] descriptions = request.getParameterValues("description[]");
+	            String[] prices = request.getParameterValues("price[]");
+	            String[] quantities = request.getParameterValues("quantity[]");
+
+	            if (itemCodes != null) {
+	                for (int i = 0; i < itemCodes.length; i++) {
+	                    String code = itemCodes[i];
+	                    String name = itemNames[i];
+	                    String desc = descriptions[i];
+	                    double price = Double.parseDouble(prices[i]);
+	                    int qty = Integer.parseInt(quantities[i]);
+	                    double total = price * qty;
+
+	                    // 4. Save into bill_details table
+	                    BillDetail bill = new BillDetail(invoice.getInvoiceNo(),code,name,desc,price,qty,total);
+	                   
+
+	                    
+	                    if (billService.insertBillDetail(bill)) {
+	                        request.setAttribute("message", "Bill items saved successfully!");
+	                        System.out.println("Bill items saved successfully!");
+	                    } else {
+	                        request.setAttribute("error", "Failed to save bill items.");
+	                        System.out.println("Failed to save bill items.");
+	                    }
+	                }
+	            }
+	        	
 	            
+
+	            String nextInvoiceNo = invoiceService.generateNextInvoiceNo();
+		        request.setAttribute("invoiceNo", nextInvoiceNo);
+	            request.setAttribute("message", "Invoice generated successfully!");
+	            request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
+	            System.out.println("Invoice generated successfully!");
+	            
+//	            insertBillInformation(request, response);
+	            
+	        } else {
+	        	  String nextInvoiceNo = invoiceService.generateNextInvoiceNo();
+	        	request.setAttribute("invoiceNo", nextInvoiceNo);
+	            request.setAttribute("error", "Failed to save invoice.");
+	            request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
+	            System.out.println("Failed to insert invoice.");
 	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
+	        String nextInvoiceNo = invoiceService.generateNextInvoiceNo();
+	        request.setAttribute("invoiceNo", nextInvoiceNo);
 	        request.setAttribute("error", "Error inserting invoice: " + e.getMessage());
-	        request.getRequestDispatcher("invoiceForm.jsp").forward(request, response);
+	        request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
+	        System.out.println("Error inserting invoice: " + e.getMessage());
 	    }
 	}
 
 	private void updateInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 	    try {
 	        
-	        String invoiceNo = request.getParameter("invoiceNo");
-	        String customerName = request.getParameter("customerName");
-	        java.sql.Date invoiceDate = java.sql.Date.valueOf(request.getParameter("invoiceDate"));
-	        java.sql.Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
-	        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
-	        double balance = Double.parseDouble(request.getParameter("balance"));
-	        String status = request.getParameter("status");
+	    	 String invoiceNo = request.getParameter("invoiceNo");
+		        String customerName = request.getParameter("customerName");
+		        Date invoiceDate = java.sql.Date.valueOf(request.getParameter("invoiceDate"));
+		        Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
+		        double discount = Double.parseDouble(request.getParameter("discount"));
+		        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
+		        double cash = Double.parseDouble(request.getParameter("cash"));
+		        double balance = Double.parseDouble(request.getParameter("balance"));
+		        String status = request.getParameter("status");
 	        
-	        Invoice invoice = new Invoice(invoiceNo,customerName,invoiceDate,dueDate,totalAmount,balance,status);
+		        Invoice invoice = new Invoice(invoiceNo, customerName, invoiceDate, dueDate,
+                        discount, totalAmount, cash, balance, status);
 	        
 	        if (invoiceService.updateInvoice(invoice)) {
 //	            response.sendRedirect("InvoiceServlet?action=list");
@@ -276,11 +356,53 @@ public class InvoiceServlet extends HttpServlet {
 	        request.setAttribute("error", "Error loading invoice data: " + e.getMessage());
 	        request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
 	    }
+	}
 	
-
+	
+	    
+//	    private void insertBillInformation(HttpServletRequest request, HttpServletResponse response) 
+//		        throws ServletException, IOException {
+//		    try {
+//		    	
+//		    	  // 3. Collect item details arrays from request
+//	            String[] itemCodes = request.getParameterValues("item_code[]");
+//	            String[] itemNames = request.getParameterValues("item_name[]");
+//	            String[] descriptions = request.getParameterValues("description[]");
+//	            String[] prices = request.getParameterValues("price[]");
+//	            String[] quantities = request.getParameterValues("quantity[]");
+//
+//	            if (itemCodes != null) {
+//	                for (int i = 0; i < itemCodes.length; i++) {
+//	                    String code = itemCodes[i];
+//	                    String name = itemNames[i];
+//	                    String desc = descriptions[i];
+//	                    double price = Double.parseDouble(prices[i]);
+//	                    int qty = Integer.parseInt(quantities[i]);
+//	                    double total = price * qty;
+//
+//	                    // 4. Save into bill_details table
+//	                    BillDetail bill = new BillDetail();
+//	                    bill.setInvoiceNo(invoice.getInvoiceNo());
+//	                    bill.setItemCode(code);
+//	                    bill.setItemName(name);
+//	                    bill.setDescription(desc);
+//	                    bill.setPrice(price);
+//	                    bill.setQuantity(qty);
+//	                    bill.setTotal(total);
+//
+//	                    billService.insertBillDetail(bill);
+//	                }
+//	            }
+//	
+//		    } catch (Exception e) {
+//		        e.printStackTrace();
+//		        request.setAttribute("error", "Error loading invoice data: " + e.getMessage());
+//		        request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
+//		    }
+//	    }
 
 	    
-	}
+	
 
 
 

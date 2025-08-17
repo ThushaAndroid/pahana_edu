@@ -73,7 +73,7 @@
 
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
-        <url-pattern>/LoginServlet</url-pattern>
+        <url-pattern>/Login</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>LogoutServlet</servlet-name>
@@ -93,11 +93,11 @@
     </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>userReportServlet</servlet-name>
-    	<url-pattern>/userReportS</url-pattern>
+    	<url-pattern>/userReport</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>InvoiceServlet</servlet-name>
-    	<url-pattern>/InvoiceSer</url-pattern>
+    	<url-pattern>/Invoice</url-pattern>
     </servlet-mapping>
    
 </web-app>

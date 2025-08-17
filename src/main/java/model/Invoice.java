@@ -8,8 +8,10 @@ public class Invoice {
     private String invoiceNo;
     private String customerName;
     private Date invoiceDate;       // invoice date
-    private Date dueDate;    // payment due date
-    private double totalAmount;   // total invoice amount
+    private Date dueDate;
+    private double discount;  // payment due date
+    private double totalAmount;
+    private double cash;// total invoice amount
     private double balance;  // remaining unpaid balance
     private String status;   // Pending, Paid, Cancelled
 
@@ -17,17 +19,20 @@ public class Invoice {
         super();
     }
 
-	public Invoice(String invoiceNo, String customerName, Date invoiceDate, Date dueDate, double totalAmount,
-			double balance, String status) {
+	public Invoice(String invoiceNo, String customerName, Date invoiceDate, Date dueDate, double discount,
+			double totalAmount, double cash, double balance, String status) {
 		super();
 		this.invoiceNo = invoiceNo;
 		this.customerName = customerName;
 		this.invoiceDate = invoiceDate;
 		this.dueDate = dueDate;
+		this.discount = discount;
 		this.totalAmount = totalAmount;
+		this.cash = cash;
 		this.balance = balance;
 		this.status = status;
 	}
+
 
 	public String getInvoiceNo() {
 		return invoiceNo;
@@ -83,6 +88,22 @@ public class Invoice {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(double discount) {
+		this.discount = discount;
+	}
+
+	public double getCash() {
+		return cash;
+	}
+
+	public void setCash(double cash) {
+		this.cash = cash;
 	}
     
 }
