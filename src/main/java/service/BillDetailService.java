@@ -2,6 +2,11 @@ package service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+
 import connection.DBConnection;
 import model.BillDetail;
 
@@ -29,6 +34,34 @@ public class BillDetailService {
 	        return false;
 
 	}
+	    
+	    public List<BillDetail> getBillDetailsByInvoice(String invoiceNo) {
+	        List<BillDetail> billList = new ArrayList<>();
+	        String sql = "SELECT * FROM bill_details WHERE invoice_no = ?";
+
+	        try (Connection con = DBConnection.getConnection();
+	             PreparedStatement ps = con.prepareStatement(sql)) {
+
+	            ps.setString(1, invoiceNo);
+	            try (ResultSet rs = ps.executeQuery()) {
+	                while (rs.next()) {
+	                    BillDetail bill = new BillDetail();
+	                    bill.setItemCode(rs.getString("item_code"));
+	                    bill.setItemName(rs.getString("item_name"));
+	                    bill.setDescription(rs.getString("description"));
+	                    bill.setPrice(rs.getDouble("price"));
+	                    bill.setQuantity(rs.getInt("quantity"));
+	                    bill.setTotal(rs.getDouble("total"));
+	                    billList.add(bill);
+	                }
+	            }
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return billList;
+	    }
 
 
 }

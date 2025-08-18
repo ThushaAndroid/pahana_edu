@@ -59,7 +59,7 @@
 
  <div class="form-group">
     <label for="item">Item:</label><br>
-    <input type="text" id="item" name="item" required 
+    <input type="text" id="item" name="item"
            placeholder="Start typing item name..." autocomplete="off">
     <input type="hidden" id="itemId" name="itemId">
     <div id="itemSuggestions" class="autocomplete-suggestions"></div>
@@ -124,15 +124,26 @@
             </select>
         </div> -->
 
-        <button type="submit" class="btn">Generate</button>
+       <button type="submit" class="btn">Generate</button> 
+       <!-- <button type="button" class="btn" onclick="validateAndSubmit()">Generate</button> -->
     </form>
 </div>
+
+<% String pdf = (String) request.getAttribute("pdfPath"); %>
+
+<% if (pdf != null) { %>
+    <script type="text/javascript">
+        alert("Invoice PDF created successfully at: <%= pdf %>");
+    </script>
+<% } %>
+
 
 <%
     String error = (String) request.getAttribute("error");
     String message = (String) request.getAttribute("message");
     if (error != null) request.removeAttribute("error");
     if (message != null) request.removeAttribute("message");
+  
 %>
 
 <script>
@@ -157,8 +168,38 @@
         timer: 4000
     });
     <% } %>
+    
+    
 </script>
 
+<!-- <script>
+function validateAndSubmit() {
+    const rows = document.querySelectorAll('#invoiceTable tbody tr');
+    
+    // Check if any items are added
+    if (rows.length === 0) {
+        alert('Please add at least one item before generating the invoice.');
+        return;
+    }
+    
+    // Check if total amount is greater than 0
+    const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
+    if (totalAmount <= 0) {
+        alert('Invoice total must be greater than 0.');
+        return;
+    }
+    
+    // Optional: Check for required fields
+    const cash = parseFloat(document.getElementById('cash').value) || 0;
+    if (cash < totalAmount) {
+        const confirmSubmit = confirm('Cash amount is less than total. Do you want to continue?');
+        if (!confirmSubmit) return;
+    }
+    
+    // All validations passed, submit the form
+    document.querySelector('form').submit();
+}
+</script> -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -288,12 +329,39 @@ document.addEventListener('DOMContentLoaded', function() {
     	        row.querySelector('.total').textContent = (qty * price).toFixed(2);
     	    });
     	    
+    	  /*   row.querySelector('.removeBtn').addEventListener('click', function () {
+    	        row.remove();
+    	    }); */
+    	    
     	    row.querySelector('.removeBtn').addEventListener('click', function () {
+    	        // Get the row total before removing (use 'total' not 'itemTotal')
+    	        const rowTotal = parseFloat(row.querySelector('.total').textContent) || 0;
+
+    	        // Update the invoice total
+    	        const totalAmountInput = document.getElementById("totalAmount");
+    	        let currentTotal = parseFloat(totalAmountInput.value) || 0;
+    	        currentTotal -= rowTotal;
+
+    	        // Set updated total
+    	        totalAmountInput.value = currentTotal.toFixed(2);
+    	        
+    	        const cash = parseFloat(document.getElementById('cash').value) || 0;
+
+        	    // Update balance
+        	    const balance = cash-currentTotal;
+        	    document.getElementById('balance').value = balance.toFixed(2);
+        	    originalAmount = currentTotal;
+
+    	        // Remove row
     	        row.remove();
     	    });
 
     	    tableBody.appendChild(row);
     	    updateTotal();
+    	    
+    	    document.getElementById("item").value = "";
+    	    document.getElementById("itemId").value = "";
+    	    document.getElementById("itemSuggestions").innerHTML = "";
     	}
      
      function updateTotal() {
@@ -312,6 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
     	    const balance = cash-total;
     	    document.getElementById('balance').value = balance.toFixed(2);
     	    originalAmount = total;
+    	    document.getElementById('discount').value = 0.0;
     	   
     	}
 

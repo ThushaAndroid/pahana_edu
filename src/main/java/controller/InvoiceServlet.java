@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -15,11 +16,14 @@ import model.Customer;
 import model.Invoice;
 import model.Item;
 import model.User;
+import print.InvoicePDFGenerator;
 import service.BillDetailService;
 import service.CustomerService;
 import service.InvoiceService;
 import service.ItemService;
 import service.UserService;
+
+import java.io.File;
 
 /**
  * Servlet implementation class InvoiceServlet
@@ -31,6 +35,7 @@ public class InvoiceServlet extends HttpServlet {
 	 private ItemService itemService;
 	 private CustomerService customerService;
 	 private BillDetailService billService;
+	 private InvoicePDFGenerator invoicePDFGenerator;
 	
 
     /**
@@ -42,6 +47,7 @@ public class InvoiceServlet extends HttpServlet {
         itemService = new ItemService();
         billService = new BillDetailService();
         // TODO Auto-generated constructor stub
+        invoicePDFGenerator = new InvoicePDFGenerator();
     }
 
 	/**
@@ -152,7 +158,7 @@ public class InvoiceServlet extends HttpServlet {
 	        double balance = Double.parseDouble(request.getParameter("balance"));
 	        String status = "Pending";
 	        
-	        if(totalAmount>=cash) {
+	        if(totalAmount<=cash) {
 	        	status = "Paid";
 	        }
 	       
@@ -170,6 +176,8 @@ public class InvoiceServlet extends HttpServlet {
 	            String[] descriptions = request.getParameterValues("description[]");
 	            String[] prices = request.getParameterValues("price[]");
 	            String[] quantities = request.getParameterValues("quantity[]");
+	            
+	            List<BillDetail> billList = new ArrayList<>();
 
 	            if (itemCodes != null) {
 	                for (int i = 0; i < itemCodes.length; i++) {
@@ -192,6 +200,8 @@ public class InvoiceServlet extends HttpServlet {
 	                        request.setAttribute("error", "Failed to save bill items.");
 	                        System.out.println("Failed to save bill items.");
 	                    }
+	                    
+	                    billList.add(bill);
 	                }
 	            }
 	        	
@@ -203,6 +213,36 @@ public class InvoiceServlet extends HttpServlet {
 	            request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
 	            System.out.println("Invoice generated successfully!");
 	            
+//	            String pdfPath = "D:\\invoices" + invoice.getInvoiceNo() + ".pdf";
+	            
+	         // Define the directory where PDFs will be saved
+	            String pdfDirPath = "D:\\invoices";
+	            File pdfDir = new File(pdfDirPath);
+
+	            // Create the directory if it doesn't exist
+	            if (!pdfDir.exists()) {
+	                if (pdfDir.mkdirs()) {
+	                    System.out.println("Directory created: " + pdfDirPath);
+	                } else {
+	                    System.out.println("Failed to create directory: " + pdfDirPath);
+	                }
+	            }
+
+	            // Define the full PDF file path
+	            String pdfPath = new File(pdfDir, invoice.getInvoiceNo() + ".pdf").getAbsolutePath();
+
+	            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice, billList, pdfPath);
+
+				File pdfFile = new File(pdfPath);
+
+				if (pdfGenerated && pdfFile.exists()) {
+					System.out.println("Invoice PDF created successfully: " + pdfPath);
+					request.setAttribute("pdfPath", pdfPath);
+				} else {
+					System.out.println("Failed to create Invoice PDF or file missing!");
+					request.setAttribute("error", "Invoice saved but PDF was not generated.");
+				}
+            
 //	            insertBillInformation(request, response);
 	            
 	        } else {
@@ -223,39 +263,166 @@ public class InvoiceServlet extends HttpServlet {
 	}
 
 	private void updateInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-	    try {
-	        
-	    	 String invoiceNo = request.getParameter("invoiceNo");
+		
+		  try {
+		        // Load all parameters from request
+		        String invoiceNo = request.getParameter("invoiceNo");
 		        String customerName = request.getParameter("customerName");
 		        Date invoiceDate = java.sql.Date.valueOf(request.getParameter("invoiceDate"));
-		        Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
+//		        Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
+		        String dueDateStr = request.getParameter("dueDate");
+		        java.sql.Date dueDate;
+
+		        if (dueDateStr != null && !dueDateStr.isEmpty()) {
+		            dueDate = java.sql.Date.valueOf(dueDateStr); // format must be "yyyy-MM-dd"
+		        } else {
+		            dueDate = new java.sql.Date(System.currentTimeMillis()); // use current date if null/empty
+		        }
+
 		        double discount = Double.parseDouble(request.getParameter("discount"));
 		        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
 		        double cash = Double.parseDouble(request.getParameter("cash"));
 		        double balance = Double.parseDouble(request.getParameter("balance"));
-		        String status = request.getParameter("status");
-	        
-		        Invoice invoice = new Invoice(invoiceNo, customerName, invoiceDate, dueDate,
-                        discount, totalAmount, cash, balance, status);
-	        
-	        if (invoiceService.updateInvoice(invoice)) {
-//	            response.sendRedirect("InvoiceServlet?action=list");
-//	        	request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
-	        	 request.setAttribute("message", "Invoice updated successfully!");
-	             System.out.println("Invoice updated successfully!");
-	        } else {
-	            request.setAttribute("error", "Failed to update invoice.");
-	            System.out.println("Failed to update invoice.");
-	        }
-	        
-	        request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
-	        
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        request.setAttribute("error", "Error updating invoice: " + e.getMessage());
-	        System.out.println("Error updating invoice: " + e.getMessage());
-	        request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
-	    }
+		        String status = "Pending";
+		        
+		        if(balance>=0) {
+		        	status = "Paid";
+		        }
+		       
+		      
+		        
+		        // Create Invoice using full constructor
+		        Invoice invoice = new Invoice(invoiceNo,  dueDate, cash, balance, status);
+
+		        if (invoiceService.updateInvoice(invoice)) {
+		        	 Invoice invoice2 = new Invoice(invoiceNo, customerName, invoiceDate, dueDate,
+	                            discount, totalAmount, cash, balance, status);
+		        	
+		        	  // 3. Collect item details arrays from request
+//		            String[] itemCodes = request.getParameterValues("item_code[]");
+//		            String[] itemNames = request.getParameterValues("item_name[]");
+//		            String[] descriptions = request.getParameterValues("description[]");
+//		            String[] prices = request.getParameterValues("price[]");
+//		            String[] quantities = request.getParameterValues("quantity[]");
+		            
+//		            List<BillDetail> billList = new ArrayList<>();
+		            List<BillDetail> billList = billService.getBillDetailsByInvoice(invoiceNo);
+		           
+
+
+//		            if (itemCodes != null) {
+//		                for (int i = 0; i < itemCodes.length; i++) {
+//		                    String code = itemCodes[i];
+//		                    String name = itemNames[i];
+//		                    String desc = descriptions[i];
+//		                    double price = Double.parseDouble(prices[i]);
+//		                    int qty = Integer.parseInt(quantities[i]);
+//		                    double total = price * qty;
+//
+//		                    // 4. Save into bill_details table
+//		                    BillDetail bill = new BillDetail(invoice.getInvoiceNo(),code,name,desc,price,qty,total);
+//		                   
+//		                    
+//		                    if (billService.insertBillDetail(bill)) {
+//		                        request.setAttribute("message", "Bill items saved successfully!");
+//		                        System.out.println("Bill items saved successfully!");
+//		                    } else {
+//		                        request.setAttribute("error", "Failed to save bill items.");
+//		                        System.out.println("Failed to save bill items.");
+//		                    }
+//		                    
+//		                    billList.add(bill);
+//		                }
+//		            }
+		            
+  
+			        request.setAttribute("invoiceNo", invoiceNo);
+		            request.setAttribute("message", "Invoice updated successfully!");
+		            request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
+		            System.out.println("Invoice updated successfully!");
+		            
+//		            String pdfPath = "D:\\invoices" + invoice.getInvoiceNo() + ".pdf";
+		            
+		         // Define the directory where PDFs will be saved
+		            String pdfDirPath = "D:\\invoices";
+		            File pdfDir = new File(pdfDirPath);
+
+		            // Create the directory if it doesn't exist
+		            if (!pdfDir.exists()) {
+		                if (pdfDir.mkdirs()) {
+		                    System.out.println("Directory created: " + pdfDirPath);
+		                } else {
+		                    System.out.println("Failed to create directory: " + pdfDirPath);
+		                }
+		            }
+
+		            // Define the full PDF file path
+		            String pdfPath = new File(pdfDir, invoice.getInvoiceNo() + ".pdf").getAbsolutePath();
+
+		            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice2, billList, pdfPath);
+
+					File pdfFile = new File(pdfPath);
+
+					if (pdfGenerated && pdfFile.exists()) {
+						System.out.println("Invoice PDF created successfully: " + pdfPath);
+						request.setAttribute("pdfPath", pdfPath);
+					} else {
+						System.out.println("Failed to create Invoice PDF or file missing!");
+						request.setAttribute("error", "Invoice saved but PDF was not generated.");
+					}
+	            
+//		            insertBillInformation(request, response);
+		            
+		        } else {
+		        	  
+		        	request.setAttribute("invoiceNo", invoiceNo);
+		            request.setAttribute("error", "Failed to save invoice.");
+		            request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
+		            System.out.println("Failed to updating invoice.");
+		        }
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        String invoiceNo = request.getParameter("invoiceNo");
+		        request.setAttribute("invoiceNo", invoiceNo);
+		        request.setAttribute("error", "Error updating invoice: " + e.getMessage());
+		        request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
+		        System.out.println("Error updating invoice: " + e.getMessage());
+		    }
+		  
+		  
+//	    try {
+//	        
+//	    	 String invoiceNo = request.getParameter("invoiceNo");
+//		        String customerName = request.getParameter("customerName");
+//		        Date invoiceDate = java.sql.Date.valueOf(request.getParameter("invoiceDate"));
+//		        Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
+//		        double discount = Double.parseDouble(request.getParameter("discount"));
+//		        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
+//		        double cash = Double.parseDouble(request.getParameter("cash"));
+//		        double balance = Double.parseDouble(request.getParameter("balance"));
+//		        String status = request.getParameter("status");
+//	        
+//		        Invoice invoice = new Invoice(invoiceNo, customerName, invoiceDate, dueDate,
+//                        discount, totalAmount, cash, balance, status);
+//	        
+//	        if (invoiceService.updateInvoice(invoice)) {
+////	            response.sendRedirect("InvoiceServlet?action=list");
+////	        	request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
+//	        	 request.setAttribute("message", "Invoice updated successfully!");
+//	             System.out.println("Invoice updated successfully!");
+//	        } else {
+//	            request.setAttribute("error", "Failed to update invoice.");
+//	            System.out.println("Failed to update invoice.");
+//	        }
+//	        
+//	        request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
+//	        
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        request.setAttribute("error", "Error updating invoice: " + e.getMessage());
+//	        System.out.println("Error updating invoice: " + e.getMessage());
+//	        request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
+//	    }
 	}
 
 	private void deleteInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException,ServletException {
@@ -304,8 +471,15 @@ public class InvoiceServlet extends HttpServlet {
 		String invoiceNo = request.getParameter("invoiceNo");
 	    Invoice invoice = invoiceService.getInvoiceByNo(invoiceNo);
 	    
+	    List<BillDetail> billList = billService.getBillDetailsByInvoice(invoiceNo);
+        if (billList == null) {
+            billList = new ArrayList<>(); // ensure it's not null
+        }
+
+	    
 		if (invoice != null) {
 			 request.setAttribute("invoice", invoice);
+			 request.setAttribute("bill_details", billList);
 				request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
 		    } else {
 		        request.setAttribute("error", "Invoice not found");

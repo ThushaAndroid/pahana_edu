@@ -64,8 +64,8 @@ public class InvoiceService {
 	
 	
 	public boolean insertInvoice(Invoice invoice) {
-	    String sql = "INSERT INTO invoices (invoice_no, customer_name, invoice_date, due_date, total_amount, balance, status) " +
-	                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
+	    String sql = "INSERT INTO invoices (invoice_no, customer_name, invoice_date, due_date, total_amount, cash, balance, status) " +
+	                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 	    try (Connection con = DBConnection.getConnection();
 	         PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -74,8 +74,9 @@ public class InvoiceService {
 	        ps.setDate(3, new java.sql.Date(invoice.getInvoiceDate().getTime()));
 	        ps.setDate(4, new java.sql.Date(invoice.getDueDate().getTime()));
 	        ps.setDouble(5, invoice.getTotalAmount());
-	        ps.setDouble(6, invoice.getBalance());
-	        ps.setString(7, invoice.getStatus());
+	        ps.setDouble(6, invoice.getCash());
+	        ps.setDouble(7, invoice.getBalance());
+	        ps.setString(8, invoice.getStatus());
 
 	        return ps.executeUpdate() > 0;
 	    } catch (Exception e) {
@@ -85,18 +86,16 @@ public class InvoiceService {
 	}
 
 	public boolean updateInvoice(Invoice invoice) {
-	    String sql = "UPDATE invoices SET customer_name=?, invoice_date=?, due_date=?, total_amount=?, balance=?, status=? " +
+	    String sql = "UPDATE invoices SET due_date=?, cash=?, balance=?, status=? " +
 	                 "WHERE invoice_no=?";
 	    try (Connection con = DBConnection.getConnection();
 	         PreparedStatement ps = con.prepareStatement(sql)) {
 
-	        ps.setString(1, invoice.getCustomerName());
-	        ps.setDate(2, new java.sql.Date(invoice.getInvoiceDate().getTime()));
-	        ps.setDate(3, new java.sql.Date(invoice.getDueDate().getTime()));
-	        ps.setDouble(4, invoice.getTotalAmount());
-	        ps.setDouble(5, invoice.getBalance());
-	        ps.setString(6, invoice.getStatus());
-	        ps.setString(7, invoice.getInvoiceNo());
+	        ps.setDate(1, new java.sql.Date(invoice.getDueDate().getTime()));
+	        ps.setDouble(2, invoice.getCash());
+	        ps.setDouble(3, invoice.getBalance());
+	        ps.setString(4, invoice.getStatus());
+	        ps.setString(5, invoice.getInvoiceNo());
 
 	        return ps.executeUpdate() > 0;
 	    } catch (Exception e) {

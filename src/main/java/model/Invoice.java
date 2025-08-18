@@ -34,6 +34,15 @@ public class Invoice {
 	}
 
 
+	public Invoice(String invoiceNo, Date dueDate, double cash, double balance, String status) {
+		super();
+		this.invoiceNo = invoiceNo;
+		this.dueDate = dueDate;
+		this.cash = cash;
+		this.balance = balance;
+		this.status = status;
+	}
+
 	public String getInvoiceNo() {
 		return invoiceNo;
 	}

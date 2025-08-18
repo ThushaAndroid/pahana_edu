@@ -1,5 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+<%@ page import="java.util.List" %>
+<%@ page import="model.Invoice" %>
+<%
+    List<Invoice> invoices = (List<Invoice>) request.getAttribute("invoices");
+String invoiceJson = new com.google.gson.Gson().toJson(invoices);
+%>
+
 <html>
 <head>
     <meta charset="UTF-8">
@@ -97,7 +104,7 @@
         { no: "INV002", date: "2025-08-06", customer: "Jane Smith", amount: "$180.00", status: "Pending" },
         { no: "INV003", date: "2025-08-06", customer: "Michael Lee", amount: "$320.00", status: "Paid" },
         { no: "INV004", date: "2025-08-06", customer: "Saman", amount: "$520.00", status: "Overdue" }
-    ];
+    ]; 
     
     function getStatusClass(status) {
         switch (status.toLowerCase()) {
