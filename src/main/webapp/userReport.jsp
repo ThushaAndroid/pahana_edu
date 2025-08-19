@@ -113,7 +113,7 @@
                 </table>
             </div>
         </div>
-    <     <%
+       <%
     String error = (String) request.getAttribute("error");
     String message = (String) request.getAttribute("message");
 %>

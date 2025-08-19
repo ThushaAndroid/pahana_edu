@@ -31,6 +31,7 @@
     
     <form action="InvoiceServlet" method="post">
         <input type="hidden" name="action" value="insert">
+          <input type="hidden" id="unitsField" name="units" value="">
 
         <div class="form-group">
             <label for="invoiceNo">Invoice No:</label><br>
@@ -51,7 +52,7 @@
     <label for="customerName">Customer Name:</label><br>
     <input type="text" id="customerName" name="customerName" required 
            placeholder="Start typing customer name..." autocomplete="off">
-    <input type="hidden" id="customerId" name="customerId">
+    <input type="hidden" id="accountNumber" name="accountNumber">
     <div id="customerSuggestions" class="autocomplete-suggestions"></div>
 </div>
 
@@ -97,7 +98,7 @@
         
           <div class="form-group">
             <label for="discount">Discount:</label><br>
-            <input type="number" step="0.01" id="discount" name="discount">
+            <input type="number" step="0.01" id="discount" name="discount" value="0.0">
         </div>
 
         <div class="form-group">
@@ -107,7 +108,7 @@
         
         <div class="form-group">
             <label for="cash">Cash:</label><br>
-            <input type="number" step="0.01" id="cash" name="cash">
+            <input type="number" step="0.01" id="cash" name="cash" value="0.0">
         </div>
 
         <div class="form-group">
@@ -205,7 +206,7 @@ function validateAndSubmit() {
 document.addEventListener('DOMContentLoaded', function() {
     const customerInput = document.getElementById('customerName');
     const customerSuggestions = document.getElementById('customerSuggestions');
-    const customerIdInput = document.getElementById('customerId');
+    const customerIdInput = document.getElementById('accountNumber');
     
     const itemInput = document.getElementById('item');
     const itemSuggestions = document.getElementById('itemSuggestions');
@@ -213,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Customer autocomplete
     customerInput.addEventListener('input', function() {
+    	
         const query = this.value.trim();
         if (query.length < 2) {
             customerSuggestions.style.display = 'none';
@@ -233,6 +235,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         customerInput.value = customer.name;
                         customerIdInput.value = customer.accountNumber;
                         customerSuggestions.style.display = 'none';
+                        
+                        getCustomerUnits(customer.accountNumber);
                     });
                     customerSuggestions.appendChild(div);
                 });
@@ -242,6 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        
+      
     });
 
     // Item autocomplete
@@ -380,8 +386,8 @@ document.addEventListener('DOMContentLoaded', function() {
     	    const balance = cash-total;
     	    document.getElementById('balance').value = balance.toFixed(2);
     	    originalAmount = total;
-    	    document.getElementById('discount').value = 0.0;
-    	   
+    	   /*  document.getElementById('discount').value = 0.0;
+    	    document.getElementById('cash').value = 0.0; */
     	}
 
     	// Call updateTotal whenever quantity changes
@@ -467,6 +473,34 @@ cashInput.addEventListener('input', () => {
     
     balanceInput.value = newBalance.toFixed(2);
 });
+
+
+/* function getCustomerUnits(var accountNo) {
+	Integer units = service.getUnitsByAccountNumber(accountNumber);
+} */
+
+function getCustomerUnits(accountNumber) {
+    if (!accountNumber) {
+        console.error("Account number is missing!");
+        return;
+    }
+
+    fetch('CustomerServlet?action=getUnits&accountNumber=' + encodeURIComponent(accountNumber))
+        .then(response => response.json())
+        .then(data => {
+            if (data.units_consumed !== undefined) {
+                console.log("Units Consumed: " + data.units_consumed);
+
+                // Example: update a hidden input or display field
+                document.getElementById("unitsField").value = data.units_consumed;
+            } else {
+                console.error("Error:", data.error);
+                alert("Customer not found!");
+            }
+        })
+        .catch(err => console.error("Fetch error:", err));
+}
+
 
 
 </script>

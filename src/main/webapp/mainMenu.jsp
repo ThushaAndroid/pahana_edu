@@ -2,11 +2,16 @@
 <!DOCTYPE html>
 <%@ page import="java.util.List" %>
 <%@ page import="model.Invoice" %>
-<%
-    List<Invoice> invoices = (List<Invoice>) request.getAttribute("invoices");
-String invoiceJson = new com.google.gson.Gson().toJson(invoices);
-%>
+<%@ page import="service.InvoiceService" %>
 
+<%
+   
+    InvoiceService service = new InvoiceService();
+
+    List<Invoice> invoices = service.getAllInvoices();
+
+  
+%>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -27,10 +32,10 @@ String invoiceJson = new com.google.gson.Gson().toJson(invoices);
         <h3>Monthly Transactions</h3>
         <canvas id="monthlyTransactionsChart"></canvas>
     </div>
-    <div class="chart-card">
+   <!--  <div class="chart-card">
         <h3>Item Category Distribution</h3>
         <canvas id="itemCategoryChart"></canvas>
-    </div>
+    </div> -->
 </div>
 
 
@@ -49,28 +54,81 @@ String invoiceJson = new com.google.gson.Gson().toJson(invoices);
                         <th>Status</th>
                     </tr>
                 </thead>
-                 <tbody id="invoiceTableBody">
-                <!-- Rows will be inserted by JavaScript -->
-            </tbody>
+                 <!-- <tbody id="invoiceTableBody">
+                Rows will be inserted by JavaScript
+            </tbody> -->
+            
+              <tbody>
+       <%
+       java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+       String todayStr = sdf.format(new java.util.Date()); 
+       
+       
+            if (invoices != null && !invoices.isEmpty()) {
+                for (Invoice invoice : invoices) {
+                	  String invoiceDateStr = sdf.format(invoice.getInvoiceDate());
+
+                      if (invoiceDateStr.equals(todayStr)) { 
+        %>
+        <tr>
+            <td><%= invoice.getInvoiceNo() %></td>
+            <td><%= invoice.getInvoiceDate() %></td>
+            <td><%= invoice.getCustomerName() %></td>
+            <td><%= invoice.getTotalAmount() %></td>
+            <td class="<%= "Paid".equalsIgnoreCase(invoice.getStatus()) ? "status-paid" :
+             "Pending".equalsIgnoreCase(invoice.getStatus()) ? "status-pending" :
+              "status-overdue" %>">
+    		<%= invoice.getStatus() %></td>
+
+
+        </tr>
+        <%
+                      }
+                }
+            } else { 
+        %>
+        <tr>
+            <td colspan="5">No items found.</td>
+        </tr>
+        <% } %>
+    </tbody>
             </table>
         </div>
     </div>
 </div>
 
 
+<%
+    // Assume invoices is a List<Invoice> with getInvoiceDate() returning java.util.Date
+    int[] monthlyCounts = new int[12]; // Jan=0, Feb=1, ...
+
+    java.util.Calendar cal = java.util.Calendar.getInstance();
+    for (Invoice invoice : invoices) {
+        cal.setTime(invoice.getInvoiceDate());
+        int month = cal.get(java.util.Calendar.MONTH); // 0 = Jan, 11 = Dec
+        monthlyCounts[month]++;
+    }
+
+    // Convert counts into a JavaScript array
+    String monthlyCountsJson = new com.google.gson.Gson().toJson(monthlyCounts);
+%>
+
+
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
+    const monthlyCounts = <%= monthlyCountsJson %>; 
     // Monthly Transactions Bar Chart
     const ctx1 = document.getElementById('monthlyTransactionsChart').getContext('2d');
     new Chart(ctx1, {
         type: 'bar',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        	labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             datasets: [{
                 label: 'Transactions',
-                data: [12, 19, 3, 5, 2, 3, 9],
+                data: monthlyCounts,
                 backgroundColor: '#4e73df'
             }]
         },
@@ -81,7 +139,7 @@ String invoiceJson = new com.google.gson.Gson().toJson(invoices);
     });
 
     // Item Category Pie Chart
-    const ctx2 = document.getElementById('itemCategoryChart').getContext('2d');
+/*     const ctx2 = document.getElementById('itemCategoryChart').getContext('2d');
     new Chart(ctx2, {
         type: 'pie',
         data: {
@@ -96,26 +154,26 @@ String invoiceJson = new com.google.gson.Gson().toJson(invoices);
             responsive: true,
             maintainAspectRatio: false
         }
-    });
+    }); */
     
     // Example data (in real case, fetch from server)
-    const invoiceData = [
+ /*    const invoiceData = [
         { no: "INV001", date: "2025-08-06", customer: "John Doe", amount: "$250.00", status: "Paid" },
         { no: "INV002", date: "2025-08-06", customer: "Jane Smith", amount: "$180.00", status: "Pending" },
         { no: "INV003", date: "2025-08-06", customer: "Michael Lee", amount: "$320.00", status: "Paid" },
         { no: "INV004", date: "2025-08-06", customer: "Saman", amount: "$520.00", status: "Overdue" }
-    ]; 
+    ];  */
     
-    function getStatusClass(status) {
+/*     function getStatusClass(status) {
         switch (status.toLowerCase()) {
             case "paid": return "status-paid";
             case "pending": return "status-pending";
             case "overdue": return "status-overdue";
             default: return "";
         }
-    }
+    } */
 
-    function populateInvoiceTable(data) {
+  /*   function populateInvoiceTable(data) {
         const tableBody = document.getElementById("invoiceTableBody");
         tableBody.innerHTML = ""; // Clear old data
 
@@ -132,7 +190,7 @@ String invoiceJson = new com.google.gson.Gson().toJson(invoices);
     }
 
     // Populate table on page load
-    populateInvoiceTable(invoiceData);
+    populateInvoiceTable(invoiceData); */
 </script>
 
 </body>

@@ -28,7 +28,7 @@ import java.io.File;
 /**
  * Servlet implementation class InvoiceServlet
  */
-@WebServlet("/InvoiceServlet")
+//@WebServlet("/InvoiceServlet")
 public class InvoiceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	 private InvoiceService invoiceService;
@@ -48,6 +48,7 @@ public class InvoiceServlet extends HttpServlet {
         billService = new BillDetailService();
         // TODO Auto-generated constructor stub
         invoicePDFGenerator = new InvoicePDFGenerator();
+        customerService = new CustomerService();
     }
 
 	/**
@@ -169,7 +170,7 @@ public class InvoiceServlet extends HttpServlet {
 	                                      discount, totalAmount, cash, balance, status);
 
 	        if (invoiceService.insertInvoice(invoice)) {
-	        	
+	        	int newUnit = 0;
 	        	  // 3. Collect item details arrays from request
 	            String[] itemCodes = request.getParameterValues("item_code[]");
 	            String[] itemNames = request.getParameterValues("item_name[]");
@@ -187,7 +188,7 @@ public class InvoiceServlet extends HttpServlet {
 	                    double price = Double.parseDouble(prices[i]);
 	                    int qty = Integer.parseInt(quantities[i]);
 	                    double total = price * qty;
-
+	                    newUnit+=qty;
 	                    // 4. Save into bill_details table
 	                    BillDetail bill = new BillDetail(invoice.getInvoiceNo(),code,name,desc,price,qty,total);
 	                   
@@ -204,7 +205,41 @@ public class InvoiceServlet extends HttpServlet {
 	                    billList.add(bill);
 	                }
 	            }
-	        	
+	            
+	            String unitsStr = request.getParameter("units"); // match the "name" of your hidden input
+	            String accountNumber = request.getParameter("accountNumber"); // match the "name" of your hidden input
+	          
+
+	            if (accountNumber == null || accountNumber.isEmpty()) {
+	                response.getWriter().write("{\"error\":\"Account number is required\"}");
+	                return;
+	            }
+
+	            if (unitsStr != null && !unitsStr.isEmpty()) {
+	                try {
+	                    int units = Integer.parseInt(unitsStr);
+	                    units=newUnit;
+	                    System.out.println("units "+units);
+	                    boolean updated = customerService.updateUnitsByAccountNumber(accountNumber, units);
+
+	                    response.setContentType("application/json");
+	                    response.setCharacterEncoding("UTF-8");
+
+	                    if (updated) {
+	                        response.getWriter().write("{\"success\":\"Units updated successfully\"}");
+	                    } else {
+	                        response.getWriter().write("{\"error\":\"Update failed or customer not found\"}");
+	                    }
+
+	                } catch (NumberFormatException e) {
+	                    response.getWriter().write("{\"error\":\"Invalid units value\"}");
+	                }
+	            } else {
+	                response.getWriter().write("{\"error\":\"Units value is missing\"}");
+	            }
+
+	            
+
 	            
 
 	            String nextInvoiceNo = invoiceService.generateNextInvoiceNo();

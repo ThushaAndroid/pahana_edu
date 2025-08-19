@@ -55,6 +55,9 @@ public class CustomerServlet extends HttpServlet {
 		case "search":
 			searchCustomer(request, response);
 			break;
+		case "getUnits":
+			getCustomerUnits(request, response);
+			break;
 		default:
 			listCustomers(request, response);
 			break;
@@ -274,7 +277,23 @@ public class CustomerServlet extends HttpServlet {
 	        response.getWriter().write("[]"); // return empty array if error
 	    }
 	}
+	
+	
+	private void getCustomerUnits(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+	 String accountNumber = request.getParameter("accountNumber");
+     CustomerService service = new CustomerService();
+     Integer units = service.getUnitsByAccountNumber(accountNumber);
 
+     response.setContentType("application/json");
+     response.setCharacterEncoding("UTF-8");
+
+     if (units != null) {
+         response.getWriter().write("{\"units_consumed\":" + units + "}");
+     } else {
+         response.getWriter().write("{\"error\":\"Customer not found\"}");
+     }
+	}
 
 
 }
