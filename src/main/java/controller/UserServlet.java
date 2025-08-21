@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import model.Customer;
 import model.Item;
@@ -287,6 +288,13 @@ public class UserServlet extends HttpServlet {
 			                             ", Status: " + user.getStatus());
 			        }
 			        
+					/* HttpSession session = request.getSession(false); */
+			     // Get session without creating a new one
+//			        String roleName = request.getParameter("roleName"); 
+//			        System.out.println("roleName: " + roleName);
+//			        // Pass roleName to JSP
+//			        request.setAttribute("roleName", roleName);
+
 			        // Set attribute and forward
 			        request.setAttribute("users", users);
 			        request.getRequestDispatcher("userReport.jsp").forward(request, response);

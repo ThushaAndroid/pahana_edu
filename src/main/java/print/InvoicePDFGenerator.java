@@ -23,6 +23,23 @@ public class InvoicePDFGenerator {
         try {
             PdfWriter.getInstance(document, new FileOutputStream(filePath));
             document.open();
+            
+            try {
+                String logoPath = "src/main/webapp/images/logo.png"; // your logo file
+                Image logo = Image.getInstance(logoPath);
+                logo.scaleToFit(100, 50);
+                logo.setAlignment(Element.ALIGN_LEFT);
+                document.add(logo);
+            } catch (Exception e) {
+                System.out.println("Logo not found or failed to load.");
+            }
+            
+            Font companyFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD, BaseColor.BLUE);
+            Paragraph company = new Paragraph("Pahana Edu Bookshop", companyFont);
+            company.setAlignment(Element.ALIGN_CENTER);
+            document.add(company);
+
+            document.add(new Paragraph(" ")); // spacing
 
             // Title
             Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);

@@ -17,6 +17,9 @@
             System.out.println("Customer: " + customer.getAccountNumber() + ", " + customer.getName());
         }
     }
+    
+    String roleName = (String)request.getAttribute("roleName");
+    System.out.println("roleName: " + roleName);
 %>
 
 <!DOCTYPE html>
@@ -89,7 +92,19 @@
             <td><%= c.getTelephone() %></td>
             <td><%= c.getEmail() %></td>
             <td><%= c.getUnitsConsumed() %></td>
+            
+            
+            
              <td>
+             <form action="CustomerServlet" method="get" style="display:inline;">
+            <input type="hidden" name="action" value="view">
+            <input type="hidden" name="accountNumber" value="<%= c.getAccountNumber() %>">
+            <%-- <input type="hidden" name="status" value="<%= u.getStatus() %>"> --%>
+            <button type="submit" class="action-btn view-btn">View</button>
+        </form>
+        
+             <% if ("Admin".equals(roleName)) { %>
+            
         <form action="CustomerServlet" method="get" style="display:inline;">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="accountNumber" value="<%= c.getAccountNumber() %>">
@@ -101,7 +116,9 @@
             <input type="hidden" name="accountNumber" value="<%= c.getAccountNumber() %>">
             <button type="submit" class="action-btn delete-btn">Delete</button>
         </form>
+         <% } %>
     </td>
+    
         </tr>
         <% 
                 }

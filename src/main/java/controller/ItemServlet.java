@@ -96,6 +96,10 @@ public class ItemServlet extends HttpServlet {
 	                             ", Quantity: " + item.getQuantity());
 	        }
 	        
+//	        String roleName = request.getParameter("roleName"); 
+//	        System.out.println("roleName: " + roleName);
+//	        // Pass roleName to JSP
+//	        request.setAttribute("roleName", roleName);
 	        // Set attribute and forward
 	        request.setAttribute("items", items);
 	        request.getRequestDispatcher("itemReport.jsp").forward(request, response);

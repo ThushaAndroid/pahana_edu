@@ -36,6 +36,10 @@
         const popup = document.getElementById("profilePopup");
         popup.classList.toggle("open");
     }
+    
+    function openHelp() {
+        window.location.href = "help.jsp"; 
+    }
 
     function setMenu() {
         const dropdown = document.getElementById("menuDropdown");
@@ -77,6 +81,7 @@
             <button class="icon-btn" title="Notifications">🔔</button>
             <button class="icon-btn" title="Settings">⚙️</button>
             <button class="icon-btn" onclick="userProfile()" title="Profile">👤</button>
+            <button class="icon-btn" onclick="openHelp()" title="Help">❓</button>
         </div>
         <button class="icon-btn menu-btn" onclick="setMenu()" title="Menu">☰</button>
     </div>
@@ -87,6 +92,7 @@
         <button class="icon-btn" title="Notifications">🔔</button>
         <button class="icon-btn" title="Settings">⚙️</button>
         <button class="icon-btn" onclick="userProfile()" title="Profile">👤</button>
+        <button class="icon-btn" onclick="openHelp()" title="Help">❓</button>
     </div>
 </div>
 
@@ -126,17 +132,36 @@
     <!-- Reports Menu -->
     <button onclick="toggleMenu('reportMenu')">Reports</button>
     <div id="reportMenu" style="padding-left:10px;">
+    
+      <% if ("Admin".equals(roleName)) { %>
         <form action="UserServlet" method="get">
+      
+
             <button type="submit" class="btn">User Report</button>
         </form>
-        <form action="CustomerServlet" method="get">
+      <%--   <form action="CustomerServlet" method="get">
+         <input type="hidden" name="roleName" value="<%= roleName %>">
+
             <button type="submit" class="btn">Customer Report</button>
-        </form>
+        </form> --%>
         <form action="ItemServlet" method="get">
+       
+
             <button type="submit" class="btn">Item Report</button>
         </form>
         <form action="InvoiceServlet" method="get">
+      
+
             <button type="submit" class="btn">Invoice Report</button>
+        </form>
+        
+          <% } %>
+        
+        
+          <form action="CustomerServlet" method="get">
+         <input type="hidden" name="roleName" value="<%= roleName %>">
+
+            <button type="submit" class="btn">Customer Report</button>
         </form>
     </div>
     

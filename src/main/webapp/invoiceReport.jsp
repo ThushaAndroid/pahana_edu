@@ -17,6 +17,9 @@
             System.out.println("Invoices: " + invoice.getInvoiceNo() + ", " + invoice.getTotalAmount());
         }
     }
+    
+  /*   String roleName = (String)request.getAttribute("roleName");
+    System.out.println("roleName: " + roleName); */
 %>
 
 <!DOCTYPE html>
@@ -85,6 +88,8 @@
     <td><%= i.getTotalAmount() %></td>
     <td><%= i.getBalance() %></td>
     <td><%= i.getStatus() %></td>
+    
+  <%--   <% if ("Admin".equals(roleName)) { %> --%>
     <td>
         <form action="InvoiceServlet" method="get" style="display:inline;">
             <input type="hidden" name="action" value="edit">
@@ -98,6 +103,10 @@
             <button type="submit" class="action-btn delete-btn">Delete</button>
         </form>
     </td>
+    
+  <%--   <%
+    }
+%> --%>
 </tr>
 <%
         }

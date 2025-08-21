@@ -6,6 +6,7 @@
 <%@ page import="model.User" %>
 
 <%
+
     // Debug code - check what's actually in the request
     Object usersObj = request.getAttribute("users");
     System.out.println("Type of users attribute: " + (usersObj != null ? usersObj.getClass() : "null"));
@@ -17,6 +18,9 @@
             System.out.println("User: " + user.getUsername() + ", " + user.getStatus());
         }
     }
+    
+   /*  String roleName = (String)request.getAttribute("roleName");
+    System.out.println("roleName: " + roleName); */
 %>
 
 <!DOCTYPE html>
@@ -87,6 +91,8 @@
 </td>
 
             <td>
+           
+           <%--   <% if ("Admin".equals(roleName)) { %> --%>
         <form action="UserServlet" method="get" style="display:inline;">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="userId" value="<%= u.getUser_id() %>">
@@ -99,7 +105,9 @@
             <input type="hidden" name="userId" value="<%= u.getUser_id() %>">
             <button type="submit" class="action-btn delete-btn">Delete</button>
         </form>
+         <%--  <% } %> --%>
     </td>
+      
         </tr>
         <% 
                 }

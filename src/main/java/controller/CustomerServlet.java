@@ -25,18 +25,6 @@ public class CustomerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private CustomerService customerService = new CustomerService();
 
-	/*
-	 * @Override public void init() throws ServletException { // Initialization code
-	 * here System.out.println("Servlet is being initialized"); String
-	 * nextAccountNumber = customerService.generateNextAccountNumber();
-	 * System.out.println("newAccountNumber "+nextAccountNumber);
-	 * 
-	 * request.setAttribute("accountNumber", nextAccountNumber);
-	 * request.getRequestDispatcher("customerRegister.jsp").forward(request,
-	 * response);
-	 * 
-	 * }
-	 */
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -49,6 +37,9 @@ public class CustomerServlet extends HttpServlet {
 		}
 
 		switch (action) {
+		case "view":
+			viewCustomer(request, response);
+			break;
 		case "edit":
 			editCustomer(request, response);
 			break;
@@ -106,6 +97,11 @@ public class CustomerServlet extends HttpServlet {
 	                             ", Nic: " + customer.getNic() + 
 	                             ", Address: " + customer.getAddress());
 	        }
+	        
+	        String roleName = request.getParameter("roleName"); 
+	        System.out.println("roleName: " + roleName);
+	        // Pass roleName to JSP
+	        request.setAttribute("roleName", roleName);
 	        
 	        // Set attribute and forward
 	        request.setAttribute("customers", customers);
@@ -169,6 +165,26 @@ public class CustomerServlet extends HttpServlet {
 			System.out.println("Database error: " + e.getMessage());
 		}
 
+	}
+	
+	private void viewCustomer(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+		String accountNumber = request.getParameter("accountNumber");
+		Customer existingCustomer = customerService.getCustomerByAccount(accountNumber);
+		
+		 if (accountNumber != null) {
+			 request.setAttribute("customer", existingCustomer);
+				request.getRequestDispatcher("viewCustomer.jsp").forward(request, response);
+		    } else {
+		        request.setAttribute("error", "Customer not found");
+		        listCustomers(request, response);
+		    }
+	 } catch (Exception e) {
+	        e.printStackTrace();
+	        request.setAttribute("error", "Error loading account number: " + e.getMessage());
+	        request.getRequestDispatcher("viewCustomer.jsp").forward(request, response);
+	    }
 	}
 
 	private void editCustomer(HttpServletRequest request, HttpServletResponse response)

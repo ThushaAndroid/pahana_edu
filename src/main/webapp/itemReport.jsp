@@ -17,7 +17,11 @@
             System.out.println("User: " + item.getItemCode() + ", " + item.getItemName());
         }
     }
+    
+  /*   String roleName = (String)request.getAttribute("roleName");
+    System.out.println("roleName: " + roleName); */
 %>
+
 
 <!DOCTYPE html>
 <html>
@@ -84,6 +88,8 @@
             <td><%= i.getDescription() %></td>
             <td><%= i.getPrice() %></td>
             <td><%= i.getQuantity() %></td>
+            
+           <%--   <% if ("Admin".equals(roleName)) { %> --%>
                <td>
         <form action="ItemServlet" method="get" style="display:inline;">
             <input type="hidden" name="action" value="edit">
@@ -97,7 +103,7 @@
             <button type="submit" class="action-btn delete-btn">Delete</button>
         </form>
     </td>
-           
+          <%--   <% } %> --%>
         </tr>
         <% 
                 }
