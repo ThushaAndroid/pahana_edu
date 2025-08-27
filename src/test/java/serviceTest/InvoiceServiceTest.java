@@ -31,7 +31,7 @@ public class InvoiceServiceTest {
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        invoiceService = new InvoiceService();
+        invoiceService = InvoiceService.getInstance();
         
       
         java.lang.reflect.Field daoField = InvoiceService.class.getDeclaredField("invoiceDAO");

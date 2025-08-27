@@ -35,6 +35,7 @@
     <h2 class="top-title">Invoice Report</h2>
 </div>
 
+
 <div class="report-card">
     <!-- <h3 class="register-title">View User Report</h3> -->
     
@@ -46,8 +47,11 @@
                         <tr>
 							<th>Invoice No</th>
 							<th>Customer Name</th>
+							<th>Customer NIC</th>
 							<th>Invoice Date</th>
 							<th>Due Date</th>
+							<th>Discount</th>
+							<th>Total Qty</th>
 							<th>Total Amount</th>
 							<th>Balance</th>
 							<th>Status</th>
@@ -83,8 +87,11 @@
 <tr>
     <td><%= i.getInvoiceNo() %></td>
     <td><%= i.getCustomerName() %></td>
+    <td><%= i.getNic() %></td>
     <td><%= i.getInvoiceDate() %></td>
     <td><%= i.getDueDate() %></td>
+    <td><%= i.getDiscount() %></td>
+    <td><%= i.getTotalQty() %></td>
     <td><%= i.getTotalAmount() %></td>
     <td><%= i.getBalance() %></td>
     <td><%= i.getStatus() %></td>
@@ -100,6 +107,8 @@
               onsubmit="return confirm('Are you sure you want to delete this invoice?');">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="invoiceNo" value="<%= i.getInvoiceNo() %>">
+            <input type="hidden" name="totalQty" value="<%= i.getTotalQty() %>">
+            <input type="hidden" name="nic" value="<%= i.getNic() %>">
             <button type="submit" class="action-btn delete-btn">Delete</button>
         </form>
     </td>
@@ -122,6 +131,18 @@
 
                 </table>
             </div>
+            
+<div class="export-buttons">
+    <form action="InvoiceServlet" method="get">
+        <input type="hidden" name="action" value="excel">
+        <button type="submit" class="excel-btn">Export to Excel</button>
+    </form>
+
+    <form action="InvoiceServlet" method="get">
+        <input type="hidden" name="action" value="pdf">
+        <button type="submit" class="pdf-btn">Export to PDF</button>
+    </form>
+</div>
         </div>
     <%
     String item_error = (String) request.getAttribute("error");

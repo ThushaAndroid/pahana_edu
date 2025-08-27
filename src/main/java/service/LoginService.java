@@ -86,11 +86,24 @@ import dao.LogingDAO;
 import model.User;
 
 public class LoginService {
+	
+	private static volatile LoginService instance;
 
     private LogingDAO logingDAO;
 
     public LoginService() {
         this.logingDAO = new LogingDAO();
+    }
+    
+    public static LoginService getInstance() {
+        if (instance == null) {
+            synchronized (LoginService.class) {
+                if (instance == null) {
+                    instance = new LoginService();
+                }
+            }
+        }
+        return instance;
     }
 
     public User authenticate(String username, String password) {

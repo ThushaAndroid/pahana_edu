@@ -107,6 +107,12 @@
             <input type="number" step="0.01" id="discount" name="discount"
              value="<%= invoice != null?invoice.getDiscount():"" %>" readonly>
         </div>
+        
+         <div class="form-group">
+            <label for="totalQty">Total Quantity:</label><br>
+            <input type="number" step="0" id="totalQty" name="totalQty"
+             value="<%= invoice != null?invoice.getTotalQty():"" %>" readonly>
+        </div>
 
         <!-- Total Amount -->
         <div class="form-group">

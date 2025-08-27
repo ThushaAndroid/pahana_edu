@@ -4,13 +4,29 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.google.gson.Gson;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import model.Customer;
+import model.Invoice;
 import model.Item;
 import service.CustomerService;
 import service.ItemService;
@@ -18,15 +34,16 @@ import service.ItemService;
 /**
  * Servlet implementation class ItemServlet
  */
-/* @WebServlet("/ItemServlet") */
+@WebServlet("/ItemServlet")
 public class ItemServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ItemService itemService = new ItemService();
+	private ItemService itemService;
        
     
     public ItemServlet() {
         super();
         // TODO Auto-generated constructor stub
+        itemService=ItemService.getInstance();
     }
 
 	
@@ -46,6 +63,12 @@ public class ItemServlet extends HttpServlet {
 	            case "search":
 	    			searchItem(request, response);
 	    			break;
+	        	case "excel":
+					exportExcel( response);
+					break;
+				case "pdf":
+					exportPDF( response);
+					break;
 	            default:
 	            	listItems(request, response);
 	                break;
@@ -269,5 +292,102 @@ public class ItemServlet extends HttpServlet {
 	        response.getWriter().write("[]"); // return empty array if error
 	    }
 	}
+	
+ private void exportExcel( HttpServletResponse response) throws IOException {
+		 
+		 List<Item> items = itemService.getAllItems();
+		 
+	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	        response.setHeader("Content-Disposition", "attachment; filename=items.xlsx");
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Items");
+	        
+	        // === Title ===
+	        Row titleRow = sheet.createRow(0);
+	        CellStyle titleStyle = workbook.createCellStyle();
+	        Font titleFont = workbook.createFont();
+	        titleFont.setBold(true);
+	        titleFont.setFontHeightInPoints((short)16);
+	        titleStyle.setFont(titleFont);
+
+	        sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0, 0, 0, 9));
+	        Cell titleCell = titleRow.createCell(0);
+	        titleCell.setCellValue("Item Report");
+	        titleCell.setCellStyle(titleStyle);
+
+	        CellStyle headerStyle = workbook.createCellStyle();
+	        Font headerFont = workbook.createFont();
+	        headerFont.setBold(true);                 
+	        headerFont.setFontHeightInPoints((short)12); 
+	        headerStyle.setFont(headerFont);
+
+	        Row header = sheet.createRow(1);
+	        String[] columns = {"Item Code", "Item Name", "Description", "price", "Quantity"};
+	        
+	        for (int i = 0; i < columns.length; i++) {
+	            Cell cell = header.createCell(i);  
+	            cell.setCellValue(columns[i]);    
+	            cell.setCellStyle(headerStyle);    
+	        }
+	        
+//	        for (int i = 0; i < columns.length; i++) {
+//	            header.createCell(i).setCellValue(columns[i]);
+//	           
+//	        }
+
+	        int rowIdx = 2;
+	        for (Item itm : items) {
+	            Row row = sheet.createRow(rowIdx++);
+	            row.createCell(0).setCellValue(itm.getItemCode());
+	            row.createCell(1).setCellValue(itm.getItemName());
+	            row.createCell(2).setCellValue(itm.getDescription());
+	            row.createCell(3).setCellValue(itm.getPrice());
+	            row.createCell(4).setCellValue(itm.getQuantity());
+	       
+	        }
+
+	        workbook.write(response.getOutputStream());
+	        workbook.close();
+	    } 
+
+	 private void exportPDF( HttpServletResponse response) throws IOException {
+		 
+		 List<Item> items = itemService.getAllItems();
+		 
+	        response.setContentType("application/pdf");
+	        response.setHeader("Content-Disposition", "attachment; filename=items.pdf");
+
+	        try {
+	            Document document = new Document();
+	            PdfWriter.getInstance(document, response.getOutputStream());
+	            document.open();
+
+	            document.add(new Paragraph("Item Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)));
+	            document.add(new Paragraph(" ")); // empty line
+
+	            PdfPTable table = new PdfPTable(5);
+	            table.setWidthPercentage(100);
+	            String[] headers = {"Item Code", "Item Name", "Description", "price", "Quantity"};
+
+	            for (String header : headers) {
+	                table.addCell(new Phrase(header, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+	            }
+
+	            for (Item itm : items) {
+	                table.addCell(itm.getItemCode());
+	                table.addCell(itm.getItemName());
+	                table.addCell(itm.getDescription());
+	                table.addCell(String.valueOf(itm.getPrice()));
+	                table.addCell(String.valueOf(itm.getQuantity()));
+	             
+	            }
+
+	            document.add(table);
+	            document.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 
 }

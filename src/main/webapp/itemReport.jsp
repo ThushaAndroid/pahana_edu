@@ -116,6 +116,18 @@
     </tbody>
                 </table>
             </div>
+            
+<div class="export-buttons">
+    <form action="ItemServlet" method="get">
+        <input type="hidden" name="action" value="excel">
+        <button type="submit" class="excel-btn">Export to Excel</button>
+    </form>
+
+    <form action="ItemServlet" method="get">
+        <input type="hidden" name="action" value="pdf">
+        <button type="submit" class="pdf-btn">Export to PDF</button>
+    </form>
+</div>
         </div>
     
     

@@ -1,11 +1,14 @@
-//package connection;
-//
-//import java.sql.Connection;
-//
-//public class DBConnectionFactory {
-//	
-//	 public static Connection getConnection() {
-//	        return DBConnection.getInstance().getConnection();
-//	    }
-//
-//}
+package connection;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+public class DBConnectionFactory {
+	
+
+		public static Connection getConnection() throws SQLException {
+			return DBConnection.getInstance().getConnection();
+		}
+	
+
+}

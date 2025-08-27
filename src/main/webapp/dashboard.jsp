@@ -139,11 +139,14 @@
 
             <button type="submit" class="btn">User Report</button>
         </form>
-      <%--   <form action="CustomerServlet" method="get">
+        
+      <form action="CustomerServlet" method="get">
          <input type="hidden" name="roleName" value="<%= roleName %>">
 
             <button type="submit" class="btn">Customer Report</button>
-        </form> --%>
+        </form> 
+        
+        
         <form action="ItemServlet" method="get">
        
 
@@ -155,14 +158,22 @@
             <button type="submit" class="btn">Invoice Report</button>
         </form>
         
-          <% } %>
-        
-        
-          <form action="CustomerServlet" method="get">
+          <% }else{
+        	  %>
+        	  
+        	    <form action="CustomerServlet" method="get">
          <input type="hidden" name="roleName" value="<%= roleName %>">
 
             <button type="submit" class="btn">Customer Report</button>
         </form>
+           <% } %>
+        
+        
+        <%--   <form action="CustomerServlet" method="get">
+         <input type="hidden" name="roleName" value="<%= roleName %>">
+
+            <button type="submit" class="btn">Customer Report</button>
+        </form> --%>
     </div>
     
     <div class="space">

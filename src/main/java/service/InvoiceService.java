@@ -156,11 +156,24 @@ import dao.InvoiceDAO;
 import model.Invoice;
 
 public class InvoiceService {
+	
+	private static volatile InvoiceService instance;
 
     private InvoiceDAO invoiceDAO;
 
     public InvoiceService() {
         this.invoiceDAO = new InvoiceDAO();
+    }
+    
+    public static InvoiceService getInstance() {
+        if (instance == null) {
+            synchronized (InvoiceService.class) {
+                if (instance == null) {
+                    instance = new InvoiceService();
+                }
+            }
+        }
+        return instance;
     }
 
     public String generateNextInvoiceNo() {

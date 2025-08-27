@@ -210,12 +210,26 @@ import dao.ItemDAO;
 import model.Item;
 
 public class ItemService {
+	
+	private static volatile ItemService instance;
 
     private ItemDAO itemDAO;
 
     public ItemService() {
         this.itemDAO = new ItemDAO();
     }
+    
+    public static ItemService getInstance() {
+        if (instance == null) {
+            synchronized (ItemService.class) {
+                if (instance == null) {
+                    instance = new ItemService();
+                }
+            }
+        }
+        return instance;
+    }
+
 
     public String generateNextItemCode() {
         return itemDAO.generateNextItemCode();
@@ -249,6 +263,14 @@ public class ItemService {
 
     public List<Item> searchItems(String query) {
         return itemDAO.searchItems(query);
+    }
+    
+    public int getQtyByCode(String itemCode) {
+    	return itemDAO.getQtyByCode(itemCode);
+    }
+    
+    public boolean updateItemQty(String itemCode, int qty) {
+    	return itemDAO.updateItemQty(itemCode,qty);
     }
 }
 

@@ -18,19 +18,20 @@
 
 
 
-
+<!-- 
 
 <web-app>
 
     <display-name>Pahana Edu Web Application</display-name>
 
-    <!-- Welcome page so /pahana-edu/ loads login.jsp -->
+    Welcome page so /pahana-edu/ loads login.jsp
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>
 
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
+        <display-name>LoginServlet</display-name>
         <servlet-class>controller.LoginServlet</servlet-class>
     </servlet>
     <servlet>
@@ -57,12 +58,12 @@
     	<description></description>
     	<servlet-class>controller.ItemServlet</servlet-class>
     </servlet>
- <!--    <servlet>
+    <servlet>
     	<servlet-name>userReportServlet</servlet-name>
     	<display-name>userReportServlet</display-name>
     	<description></description>
     	<servlet-class>controller.userReportServlet</servlet-class>
-    </servlet> -->
+    </servlet>
     <servlet>
     	<servlet-name>InvoiceServlet</servlet-name>
     	<display-name>InvoiceServlet</display-name>
@@ -73,35 +74,46 @@
 
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
-        <url-pattern>/LoginServlet</url-pattern>
+        <url-pattern>/LoginServle</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>LogoutServlet</servlet-name>
-    	<url-pattern>/LogoutServlet</url-pattern>
+    	<url-pattern>/LogoutServle</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>UserServlet</servlet-name>
-    	<url-pattern>/UserServlet</url-pattern>
+    	<url-pattern>/UserServle</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>CustomerServlet</servlet-name>
-    	<url-pattern>/CustomerServlet</url-pattern>
+    	<url-pattern>/CustomerServle</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>ItemServlet</servlet-name>
-    	<url-pattern>/ItemServlet</url-pattern>
+    	<url-pattern>/ItemServle</url-pattern>
     </servlet-mapping>
-<!--     <servlet-mapping>
+    <servlet-mapping>
     	<servlet-name>userReportServlet</servlet-name>
     	<url-pattern>/userReportServlet</url-pattern>
-    </servlet-mapping> -->
+    </servlet-mapping>
     <servlet-mapping>
     	<servlet-name>InvoiceServlet</servlet-name>
-    	<url-pattern>/InvoiceServlet</url-pattern>
+    	<url-pattern>/InvoiceServle</url-pattern>
     </servlet-mapping>
    
 </web-app>
 
+ -->
+ 
+ 
+ <web-app>
 
+    <display-name>Pahana Edu Web Application</display-name>
+  
+    <welcome-file-list>
+        <welcome-file>login.jsp</welcome-file>
+    </welcome-file-list>
+
+</web-app>
 
 
