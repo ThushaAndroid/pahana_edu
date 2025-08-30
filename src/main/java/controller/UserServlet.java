@@ -151,13 +151,18 @@ public class UserServlet extends HttpServlet {
 		        if (userService.addUser(newUser)) {
 		            request.setAttribute("message", "User Registration successful! You can now log in.");
 		            System.out.println("User Registration successful! You can now log in");
+		            
+		            List<User> users = userService.getAllUsers();
+			        request.setAttribute("users", users);
+			        request.getRequestDispatcher("userReport.jsp").forward(request, response);
 		        } else {
 		            request.setAttribute("error", "Error occurred during registration.");
 		            System.out.println("Error occurred during registration.");
+		            request.getRequestDispatcher("userRegister.jsp").forward(request, response);
 		        }
 		        
-		        request.setAttribute("mainContent", "userRegister.jsp");
-		        request.getRequestDispatcher("userRegister.jsp").forward(request, response);
+		        //request.setAttribute("mainContent", "userRegister.jsp");
+		       // request.getRequestDispatcher("userRegister.jsp").forward(request, response);
 		       
 		    
 		        
@@ -220,13 +225,16 @@ public class UserServlet extends HttpServlet {
 		        if (userService.updateUser(existingUser)) {
 					/* request.setAttribute("user", user); */
 					/* forwardToUpdatePage(request, response); */
-		        	List<User> users = userService.getAllUsers();
-			        request.setAttribute("users", users);
+		        	//List<User> users = userService.getAllUsers();
+			        //request.setAttribute("users", users);
 			        
 		            request.setAttribute("message", "User updated successfully!");
 		            System.out.println("User updated successfully!");
 					/* response.sendRedirect("UserServlet?action=list"); */
-		            request.getRequestDispatcher("updateUser.jsp").forward(request, response);
+		            //request.getRequestDispatcher("updateUser.jsp").forward(request, response);
+		            List<User> users = userService.getAllUsers();
+			        request.setAttribute("users", users);
+			        request.getRequestDispatcher("userReport.jsp").forward(request, response);
 		        } else {
 					/* forwardToUpdatePage(request, response); */
 		            request.setAttribute("error", "Failed to update user.");
@@ -246,7 +254,7 @@ public class UserServlet extends HttpServlet {
 	            request.getRequestDispatcher("updateUser.jsp").forward(request, response);
 		    }
 
-		   
+		
 		}
 		
 

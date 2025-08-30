@@ -219,6 +219,43 @@ public class ItemDAO {
         }
         return false;
     }
+    
+    
+    public List<Item> getItemsNameNQty() {
+        List<Item> items = new ArrayList<>();
+        String sql = "SELECT item_name, quantity FROM items";
+
+        try (Connection conn = DBConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Item item = new Item();
+                item.setItemName(rs.getString("item_name")); 
+                item.setQuantity(rs.getInt("quantity")); 
+                items.add(item);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return items;
+    }
+
+    public boolean increaseItemQty(String itemCode, int qty) {
+        String sql = "UPDATE items SET quantity = quantity + ? WHERE item_code = ?";
+        try (Connection conn = DBConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, qty);
+            stmt.setString(2, itemCode);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 }
 

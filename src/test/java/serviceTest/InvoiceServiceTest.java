@@ -390,6 +390,46 @@ public class InvoiceServiceTest {
     }
     
     @Test
+    public void testGetInvoicesStatusNDue_ReturnsInvoices() {
+        List<Invoice> mockInvoices = new ArrayList<>();
+        Invoice inv1 = new Invoice();
+        inv1.setInvoiceNo("INV001");
+        inv1.setDueDate(new java.sql.Date(System.currentTimeMillis() - 86400000));
+        inv1.setStatus("Pending");
+        mockInvoices.add(inv1);
+
+        Invoice inv2 = new Invoice();
+        inv2.setInvoiceNo("INV002");
+        inv2.setDueDate(new java.sql.Date(System.currentTimeMillis() + 86400000));
+        inv2.setStatus("Paid");
+        mockInvoices.add(inv2);
+
+        when(mockInvoiceDAO.getInvoicesStatusNDue()).thenReturn(mockInvoices);
+
+        List<Invoice> result = invoiceService.getInvoicesStatusNDue();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("INV001", result.get(0).getInvoiceNo());
+        assertEquals("Pending", result.get(0).getStatus());
+
+        verify(mockInvoiceDAO, times(1)).getInvoicesStatusNDue();
+    }
+
+  
+    @Test
+    public void testGetInvoicesStatusNDue_EmptyList() {
+    	List<Invoice> emptyList = new ArrayList<>();
+        when(mockInvoiceDAO.getInvoicesStatusNDue()).thenReturn(emptyList);
+
+        List<Invoice> result = invoiceService.getInvoicesStatusNDue();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty(), "Invoice list should be empty");
+        verify(mockInvoiceDAO, times(1)).getInvoicesStatusNDue();
+    }
+    
+    @Test
     public void testInvoiceWithDifferentPaymentScenarios() {
      
         Invoice fullPaymentInvoice = new Invoice();

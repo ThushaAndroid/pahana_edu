@@ -143,4 +143,33 @@ public class InvoiceDAO {
         }
         return invoices;
     }
+    
+    
+    public List<Invoice> getInvoicesStatusNDue() {
+        List<Invoice> invoices = new ArrayList<>();
+        String sql = "SELECT invoice_no, due_date, status FROM invoices";
+
+        try (Connection con = DBConnectionFactory.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Invoice invoice = new Invoice();
+                
+                // Map correctly
+                invoice.setInvoiceNo(rs.getString("invoice_no")); 
+                invoice.setDueDate(rs.getDate("due_date"));        
+                invoice.setStatus(rs.getString("status"));     
+
+                invoices.add(invoice);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return invoices;
+    }
+
+
 }

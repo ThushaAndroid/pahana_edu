@@ -272,5 +272,13 @@ public class ItemService {
     public boolean updateItemQty(String itemCode, int qty) {
     	return itemDAO.updateItemQty(itemCode,qty);
     }
+    
+    public List<Item> getItemsNameNQty() {
+    	return itemDAO.getItemsNameNQty();
+    }
+    
+    public boolean increaseItemQty(String itemCode, int qty) {
+    	return itemDAO.increaseItemQty(itemCode,qty);
+    }
 }
 

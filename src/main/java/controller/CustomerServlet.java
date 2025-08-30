@@ -175,13 +175,24 @@ public class CustomerServlet extends HttpServlet {
 			if (customerService.addCustomer(customer)) {
 				request.setAttribute("message", "Customer Registration successful! You can now log in.");
 				System.out.println("Customer Registration successful! You can now log in");
+				
+				// Reload updated customer list
+			    List<Customer> customers = customerService.getAllCustomers();
+			    request.setAttribute("customers", customers);
+
+			    // Forward to JSP
+			    request.getRequestDispatcher("customerReport.jsp").forward(request, response);
+
 
 			} else {
 				request.setAttribute("error", "Error occurred during registration.");
 				System.out.println("Error occurred during registration.");
+				request.getRequestDispatcher("customerRegister.jsp").forward(request, response);
 			}
 
-			request.getRequestDispatcher("customerRegister.jsp").forward(request, response);
+			
+			// request.getRequestDispatcher("customerRegister.jsp").forward(request, response);
+			 
 			/* response.sendRedirect("customer?action=list"); */
 
 		} catch (Exception e) {
@@ -248,13 +259,21 @@ public class CustomerServlet extends HttpServlet {
 		if(customerService.updateCustomer(customer)) {
 			request.setAttribute("message", "Customer update successful!");
 			System.out.println("Customer update successful!");
+			
+			// Reload updated customer list
+		    List<Customer> customers = customerService.getAllCustomers();
+		    request.setAttribute("customers", customers);
+
+		    // Forward to JSP
+		    request.getRequestDispatcher("customerReport.jsp").forward(request, response);
 
 		} else {
 			request.setAttribute("error", "Error occurred during registration.");
 			System.out.println("Error occurred during updating.");
+			request.getRequestDispatcher("updateCustomer.js").forward(request, response);
 		}
 
-		request.getRequestDispatcher("updateCustomer.jsp").forward(request, response);
+		//request.getRequestDispatcher("updateCustomer.jsp").forward(request, response);
 		} catch (Exception e) {
 			// 3️⃣ Database error handling
 			request.setAttribute("error", "Database error: " + e.getMessage());
@@ -262,6 +281,8 @@ public class CustomerServlet extends HttpServlet {
 			System.out.println("Database error: " + e.getMessage());
 		}
 		/* response.sendRedirect("customer?action=list"); */
+		
+	
 	}
 
 	private void deleteCustomer(HttpServletRequest request, HttpServletResponse response)

@@ -368,6 +368,105 @@ public class ItemServiceTest {
     }
     
     @Test
+    public void testUpdateItemQty_Success() {
+        String itemCode = "ITEM001";
+        int qty = 5;
+
+        when(mockItemDAO.updateItemQty(itemCode, qty)).thenReturn(true);
+
+        boolean result = itemService.updateItemQty(itemCode, qty);
+
+        assertTrue(result, "Item quantity should be updated successfully");
+
+        verify(mockItemDAO, times(1)).updateItemQty(itemCode, qty);
+    }
+    
+    @Test
+    public void testUpdateItemQty_Failure() {
+        String itemCode = "ITEM001";
+        int qty = 5;
+
+      
+        when(mockItemDAO.updateItemQty(itemCode, qty)).thenReturn(false);
+
+       
+        boolean result = itemService.updateItemQty(itemCode, qty);
+
+       
+        assertFalse(result, "Item quantity update should fail");
+        verify(mockItemDAO, times(1)).updateItemQty(itemCode, qty);
+    }
+    
+    @Test
+    public void testGetItemsNameNQty_ReturnsItems() {
+        List<Item> mockItems = new ArrayList<>();
+        Item item1 = new Item();
+        item1.setItemName("Pen");
+        item1.setQuantity(10);
+        mockItems.add(item1);
+
+        Item item2 = new Item();
+        item2.setItemName("Book");
+        item2.setQuantity(5);
+        mockItems.add(item2);
+
+        when(mockItemDAO.getItemsNameNQty()).thenReturn(mockItems);
+
+        List<Item> result = itemService.getItemsNameNQty();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Pen", result.get(0).getItemName());
+        assertEquals(10, result.get(0).getQuantity());
+        verify(mockItemDAO, times(1)).getItemsNameNQty();
+    }
+
+   
+    @Test
+    public void testGetItemsNameNQty_EmptyList() {
+    	
+    	 List<Item> emptyList = new ArrayList<>();
+        when(mockItemDAO.getItemsNameNQty()).thenReturn(emptyList);
+
+        List<Item> result = itemService.getItemsNameNQty();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty(), "List should be empty");
+        verify(mockItemDAO, times(1)).getItemsNameNQty();
+    }
+    
+    
+    @Test
+    public void testIncreaseItemQty_Success() {
+        String itemCode = "ITEM001";
+        int qty = 5;
+
+        when(mockItemDAO.increaseItemQty(itemCode, qty)).thenReturn(true);
+
+        boolean result = itemService.increaseItemQty(itemCode, qty);
+
+        assertTrue(result, "Quantity should be increased successfully");
+        verify(mockItemDAO, times(1)).increaseItemQty(itemCode, qty);
+    }
+
+   
+    @Test
+    public void testIncreaseItemQty_Failure() {
+        String itemCode = "ITEM001";
+        int qty = 5;
+
+        when(mockItemDAO.increaseItemQty(itemCode, qty)).thenReturn(false);
+
+        boolean result = itemService.increaseItemQty(itemCode, qty);
+
+        assertFalse(result, "Quantity increase should fail");
+        verify(mockItemDAO, times(1)).increaseItemQty(itemCode, qty);
+    }
+
+
+
+    
+    @Test
     public void testItemServiceWorkflow() {
       
         Item newItem = new Item();

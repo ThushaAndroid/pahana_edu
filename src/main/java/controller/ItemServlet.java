@@ -164,8 +164,15 @@ public class ItemServlet extends HttpServlet {
         
          if (itemService.addItem(item)) {
         	 request.setAttribute("message", "Item added successful!");
-        	 request.getRequestDispatcher("addItem.jsp").forward(request, response);
+        	// request.getRequestDispatcher("addItem.jsp").forward(request, response);
 			System.out.println("Item added successful!");
+			
+			 // Reload updated item list
+    	    List<Item>items = itemService.getAllItems();
+    	    request.setAttribute("items", items);
+
+    	    // Forward to JSP
+    	    request.getRequestDispatcher("itemReport.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Failed to add item.");
             request.getRequestDispatcher("addItem.jsp").forward(request, response);
@@ -223,12 +230,20 @@ public class ItemServlet extends HttpServlet {
         if (itemService.updateItem(item)) {
             request.setAttribute("message", "Item updated successfully!");
             System.out.println("Item updated successfully!");
+            
+            // Reload updated item list
+    	    List<Item>items = itemService.getAllItems();
+    	    request.setAttribute("items", items);
+
+    	    // Forward to JSP
+    	    request.getRequestDispatcher("itemReport.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Failed to update item.");
             System.out.println("Failed to update item.");
+            request.getRequestDispatcher("updateItem.jsp").forward(request, response);
         }
         
-        request.getRequestDispatcher("updateItem.jsp").forward(request, response);
+        //request.getRequestDispatcher("updateItem.jsp").forward(request, response);
         
     } catch (Exception e) {
 		// 3️⃣ Database error handling
@@ -236,6 +251,8 @@ public class ItemServlet extends HttpServlet {
 		request.getRequestDispatcher("updateItem.jsp").forward(request, response);
 		System.out.println("Database error: " + e.getMessage());
 	}
+        
+     
     }
     
     private void deleteItem(HttpServletRequest request, HttpServletResponse response)

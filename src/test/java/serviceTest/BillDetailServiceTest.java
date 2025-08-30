@@ -38,8 +38,8 @@ public class BillDetailServiceTest {
         testBillDetail = new BillDetail(
             "INV001",
             "ITEM001", 
-            "Test Item",
-            "Test Description",
+            "BOOK",
+            "Reading book",
             10.50,
             2,
             21.00
@@ -86,7 +86,7 @@ public class BillDetailServiceTest {
         assertNotNull(result, "Bill details list should not be null");
         assertEquals(1, result.size(), "Should return 1 bill detail");
         assertEquals("ITEM001", result.get(0).getItemCode());
-        assertEquals("Test Item", result.get(0).getItemName());
+        assertEquals("BOOK", result.get(0).getItemName());
         assertEquals(21.00, result.get(0).getTotal());
         
         verify(mockBillDetailDAO, times(1)).getBillDetailsByInvoice(invoiceNo);
@@ -95,12 +95,12 @@ public class BillDetailServiceTest {
   
     @Test
     public void testInsertBillDetail_EmptyInvoiceNo() {
-        // Arrange
+      
         BillDetail billWithEmptyInvoice = new BillDetail(
             "",
             "ITEM001",
-            "Test Item", 
-            "Test Description",
+            "BOOK", 
+            "Reading book",
             10.50,
             2,
             21.00
