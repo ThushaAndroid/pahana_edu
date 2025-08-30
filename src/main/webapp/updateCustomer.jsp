@@ -103,5 +103,69 @@
     <% } %>
 </script>
 
+
+<script>
+function validateNIC(nic) {
+    // Sri Lanka NIC: old (9 digits + V/X) or new (12 digits)
+    let regex = /^([0-9]{9}[VvXx]|[0-9]{12})$/;
+    return regex.test(nic);
+}
+
+function validateTelephone(tel) {
+    let regex = /^(0\d{9}|\+94\d{9})$/;
+    return regex.test(tel);
+}
+
+document.querySelector("form").addEventListener("submit", function(event) {
+    let nic = document.getElementById("nic").value.trim();
+    let tel = document.getElementById("telephone").value.trim();
+    
+    if (!validateNIC(nic)) {
+        /*   event.preventDefault();
+          
+          alert('NIC must be either 9 digits + V/X or 12 digits.'); */
+          Swal.fire({
+              icon: 'error',
+              title: 'NIC must be either 9 digits + V/X or 12 digits.',
+              toast: true,
+              position: 'bottom-end',
+              showConfirmButton: false,
+              timer: 3000
+          });
+          return;
+      }
+
+      if (!validateTelephone(tel)) {
+         /*  event.preventDefault();
+         
+          alert('Telephone must be 10 digits and start with 0 or Telephone must be 12 digits and start with +94'); */
+          Swal.fire({
+              icon: 'error',
+              title: 'Telephone must be 10 digits and start with 0 or Telephone must be 12 digits and start with +94',
+              toast: true,
+              position: 'bottom-end',
+              showConfirmButton: false,
+              timer: 3000
+          });
+          return;
+      }
+
+  /*   if (!validateNIC(nic)) {
+        event.preventDefault();
+        
+        alert('NIC must be either 9 digits + V/X or 12 digits.');
+        return;
+    }
+
+    if (!validateTelephone(tel)) {
+        event.preventDefault();
+       
+        alert('Telephone must be 10 digits and start with 0 or Telephone must be 12 digits and start with +94');
+        return;
+    } */
+});
+</script>
+
+
 </body>
 </html>

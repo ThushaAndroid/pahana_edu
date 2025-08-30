@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import connection.DBConnection;
+import connection.DBConnectionFactory;
 import model.User;
 
 public class LogingDAO {
@@ -12,7 +13,7 @@ public class LogingDAO {
         User user = null;
         String sql = "SELECT username, password, role, status FROM users WHERE username = ? AND password = ?";
 
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
@@ -36,7 +37,7 @@ public class LogingDAO {
 
     public User getActiveUserByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ? AND status = 'active'";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);

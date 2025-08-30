@@ -74,14 +74,45 @@ import model.BillDetail;
 
 public class BillDetailService {
 
+	private static volatile BillDetailService instance;
     private BillDetailDAO billDetailDAO;
 
     public BillDetailService() {
         this.billDetailDAO = new BillDetailDAO();
     }
+    
+    public static BillDetailService getInstance() {
+        if (instance == null) {
+            synchronized (BillDetailService.class) {
+                if (instance == null) {
+                    instance = new BillDetailService();
+                }
+            }
+        }
+        return instance;
+    }
 
+//    public boolean insertBillDetail(BillDetail bill) {
+//        if (bill == null || bill.getInvoiceNo() == null) return false;
+//        return billDetailDAO.insertBillDetail(bill);
+//    }
+    
     public boolean insertBillDetail(BillDetail bill) {
-        if (bill == null || bill.getInvoiceNo() == null) return false;
+       
+        if (bill == null) {
+            return false;
+        }
+        
+        String invoiceNo = bill.getInvoiceNo();
+        if (invoiceNo == null || invoiceNo.trim().isEmpty()) {
+            return false;
+        }
+        
+        
+        if (invoiceNo.length() == 0) {
+            return false;
+        }
+        
         return billDetailDAO.insertBillDetail(bill);
     }
 

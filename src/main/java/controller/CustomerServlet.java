@@ -5,13 +5,29 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.google.gson.Gson;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import model.Customer;
+import model.Invoice;
 import model.User;
 import service.CustomerService;
 import service.LoginService;
@@ -19,11 +35,15 @@ import service.LoginService;
 /**
  * Servlet implementation class CustomerServlet
  */
-/* @WebServlet("/CustomerServlet") */
+@WebServlet("/CustomerServlet")
 public class CustomerServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private CustomerService customerService = new CustomerService();
+	private CustomerService customerService;
+	
+	public void init() throws ServletException {
+		customerService = CustomerService.getInstance();
+	}
 
 
 	@Override
@@ -48,6 +68,12 @@ public class CustomerServlet extends HttpServlet {
 			break;
 		case "getUnits":
 			getCustomerUnits(request, response);
+			break;
+		case "excel":
+			exportExcel( response);
+			break;
+		case "pdf":
+			exportPDF( response);
 			break;
 		default:
 			listCustomers(request, response);
@@ -311,5 +337,99 @@ public class CustomerServlet extends HttpServlet {
      }
 	}
 
+	 private void exportExcel( HttpServletResponse response) throws IOException {
+		 
+		 List<Customer> customers = customerService.getAllCustomers();
+		 
+	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	        response.setHeader("Content-Disposition", "attachment; filename=customers.xlsx");
 
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Customers");
+	        
+	        // === Title ===
+	        Row titleRow = sheet.createRow(0);
+	        CellStyle titleStyle = workbook.createCellStyle();
+	        Font titleFont = workbook.createFont();
+	        titleFont.setBold(true);
+	        titleFont.setFontHeightInPoints((short)16);
+	        titleStyle.setFont(titleFont);
+
+	        sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0, 0, 0, 9));
+	        Cell titleCell = titleRow.createCell(0);
+	        titleCell.setCellValue("Customer Report");
+	        titleCell.setCellStyle(titleStyle);
+
+	        CellStyle headerStyle = workbook.createCellStyle();
+	        Font headerFont = workbook.createFont();
+	        headerFont.setBold(true);                 
+	        headerFont.setFontHeightInPoints((short)12); 
+	        headerStyle.setFont(headerFont);
+
+	        Row header = sheet.createRow(1);
+	        String[] columns = {"Account Number","NIC", "Name", "Telephone", "Email", "Units Consumed"};
+	        
+	        for (int i = 0; i < columns.length; i++) {
+	            Cell cell = header.createCell(i);  
+	            cell.setCellValue(columns[i]);    
+	            cell.setCellStyle(headerStyle);    
+	        }
+//	        for (int i = 0; i < columns.length; i++) {
+//	            header.createCell(i).setCellValue(columns[i]);
+//	        }
+
+	        int rowIdx = 2;
+	        for (Customer cus : customers) {
+	            Row row = sheet.createRow(rowIdx++);
+	            row.createCell(0).setCellValue(cus.getAccountNumber());
+	            row.createCell(1).setCellValue(cus.getNic());
+	            row.createCell(2).setCellValue(cus.getName());
+	            row.createCell(3).setCellValue(cus.getTelephone());
+	            row.createCell(4).setCellValue(cus.getEmail());
+	            row.createCell(5).setCellValue(cus.getUnitsConsumed());
+	         
+	        }
+
+	        workbook.write(response.getOutputStream());
+	        workbook.close();
+	    } 
+
+	 private void exportPDF( HttpServletResponse response) throws IOException {
+		 
+		 List<Customer> customers = customerService.getAllCustomers();
+		 
+	        response.setContentType("application/pdf");
+	        response.setHeader("Content-Disposition", "attachment; filename=customers.pdf");
+
+	        try {
+	            Document document = new Document();
+	            PdfWriter.getInstance(document, response.getOutputStream());
+	            document.open();
+
+	            document.add(new Paragraph("Customer Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)));
+	            document.add(new Paragraph(" ")); // empty line
+
+	            PdfPTable table = new PdfPTable(6);
+	            table.setWidthPercentage(100);
+	            String[] headers = {"Account Number","NIC", "Name", "Telephone", "Email", "Units Consumed"};
+
+	            for (String header : headers) {
+	                table.addCell(new Phrase(header, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+	            }
+
+	            for (Customer cus : customers) {
+	                table.addCell(cus.getAccountNumber());
+	                table.addCell(cus.getNic());
+	                table.addCell(cus.getName());
+	                table.addCell(cus.getTelephone());
+	                table.addCell(cus.getEmail());
+	                table.addCell(String.valueOf(cus.getUnitsConsumed()));
+	            }
+
+	            document.add(table);
+	            document.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 }

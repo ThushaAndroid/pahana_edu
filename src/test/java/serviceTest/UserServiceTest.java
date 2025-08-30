@@ -21,7 +21,7 @@ public class UserServiceTest {
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        userService = new UserService();
+        userService = UserService.getInstance();
         
      
         java.lang.reflect.Field daoField = UserService.class.getDeclaredField("userDAO");

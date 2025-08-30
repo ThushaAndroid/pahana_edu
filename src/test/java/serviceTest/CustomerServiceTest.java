@@ -24,7 +24,7 @@ public class CustomerServiceTest {
     public void setUp() throws Exception {
        
         MockitoAnnotations.openMocks(this);
-        customerService = new CustomerService();
+        customerService = CustomerService.getInstance();
         
       
         Field daoField = CustomerService.class.getDeclaredField("customerDAO");

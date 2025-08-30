@@ -219,11 +219,23 @@ import dao.CustomerDAO;
 import model.Customer;
 
 public class CustomerService {
-
+	
+	private static volatile CustomerService instance;
     private CustomerDAO customerDAO;
 
     public CustomerService() {
         this.customerDAO = new CustomerDAO();
+    }
+    
+    public static CustomerService getInstance() {
+        if (instance == null) {
+            synchronized (CustomerService.class) {
+                if (instance == null) {
+                    instance = new CustomerService();
+                }
+            }
+        }
+        return instance;
     }
 
     public String generateNextAccountNumber() {
@@ -264,8 +276,17 @@ public class CustomerService {
         return customerDAO.getUnitsByAccountNumber(accountNumber);
     }
     
-    public boolean updateUnitsByAccountNumber(String accountNumber,int unit) {
-    	return customerDAO.updateUnitsByAccountNumber(accountNumber,unit);
+    public Integer getUnitsByNic(String nic) {
+        return customerDAO.getUnitsByNic(nic);
     }
+    
+//    public boolean updateUnitsByAccountNumber(String accountNumber,int unit) {
+//    	return customerDAO.updateUnitsByAccountNumber(accountNumber,unit);
+//    }
+    
+    public boolean updateUnitsByAccountNumberOrNic(String accountNumberOrNic, int units) {
+        return customerDAO.updateUnitsByAccountNumberOrNic(accountNumberOrNic, units);
+    }
+
 }
 

@@ -25,10 +25,19 @@ import service.UserService;
 
 import java.io.File;
 
+//Apache POI for Excel
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+//iText for PDF
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+
 /**
  * Servlet implementation class InvoiceServlet
  */
-//@WebServlet("/InvoiceServlet")
+@WebServlet("/InvoiceServlet")
 public class InvoiceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	 private InvoiceService invoiceService;
@@ -43,12 +52,12 @@ public class InvoiceServlet extends HttpServlet {
      */
     public InvoiceServlet() {
         super();
-        invoiceService = new InvoiceService();
-        itemService = new ItemService();
-        billService = new BillDetailService();
+        invoiceService = InvoiceService.getInstance();
+        itemService = ItemService.getInstance();
+        billService = BillDetailService.getInstance();
         // TODO Auto-generated constructor stub
         invoicePDFGenerator = new InvoicePDFGenerator();
-        customerService = new CustomerService();
+        customerService = CustomerService.getInstance();
     }
 
 	/**
@@ -66,6 +75,15 @@ public class InvoiceServlet extends HttpServlet {
 				break;
 			case "edit":
 				editInvoice(request, response);
+				break;
+			case "excel":
+				exportExcel( response);
+				break;
+			case "pdf":
+				exportPDF( response);
+				break;
+			case "insert":
+				insertInvoice(request, response);
 				break;
 			default:
 				listInvoices(request, response);
@@ -114,6 +132,7 @@ public class InvoiceServlet extends HttpServlet {
 	            System.out.println(
 	                "InvoiceNo: " + invoice.getInvoiceNo() +
 	                ", Customer: " + invoice.getCustomerName() +
+	                ", Customer NIC: " + invoice.getNic() +
 	                ", Invoice Date: " + invoice.getInvoiceDate() +
 	                ", Due Date: " + invoice.getDueDate() +
 	                ", Total Amount: " + invoice.getTotalAmount() +
@@ -146,6 +165,7 @@ public class InvoiceServlet extends HttpServlet {
 	        // Load all parameters from request
 	        String invoiceNo = request.getParameter("invoiceNo");
 	        String customerName = request.getParameter("customerName");
+	        String customerNic = request.getParameter("nic");
 	        Date invoiceDate = java.sql.Date.valueOf(request.getParameter("invoiceDate"));
 //	        Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
 	        String dueDateStr = request.getParameter("dueDate");
@@ -158,6 +178,7 @@ public class InvoiceServlet extends HttpServlet {
 	        }
 
 	        double discount = Double.parseDouble(request.getParameter("discount"));
+	        int totalQty = Integer.parseInt(request.getParameter("totalQty"));
 	        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
 	        double cash = Double.parseDouble(request.getParameter("cash"));
 	        double balance = Double.parseDouble(request.getParameter("balance"));
@@ -168,8 +189,8 @@ public class InvoiceServlet extends HttpServlet {
 	        }
 	        
 	        // Create Invoice using full constructor
-	        Invoice invoice = new Invoice(invoiceNo, customerName, invoiceDate, dueDate,
-	                                      discount, totalAmount, cash, balance, status);
+	        Invoice invoice = new Invoice(invoiceNo, customerName,customerNic, invoiceDate, dueDate,
+	                                      discount, totalQty, totalAmount, cash, balance, status);
 
 	        if (invoiceService.insertInvoice(invoice)) {
 	        	int newUnit = 0;
@@ -205,6 +226,22 @@ public class InvoiceServlet extends HttpServlet {
 	                    }
 	                    
 	                    billList.add(bill);
+	                    
+	                    
+	                    System.out.println("current item qty "+qty);	
+	                    int itemQty=itemService.getQtyByCode(code);
+	                    itemQty-=qty;
+	                    
+	                    System.out.println("new item qty "+itemQty);	
+	                   
+	                    
+	                    if (itemService.updateItemQty(code, itemQty)) {
+	                    	
+	                    	System.out.println("itemQty updated successfully!");
+	                    }else {
+	                    	  request.setAttribute("error", "Failed to update itemQty.");
+	                    	 System.out.println("Failed to update itemQty.");
+	                    }
 	                }
 	            }
 	            
@@ -220,24 +257,28 @@ public class InvoiceServlet extends HttpServlet {
 	            if (unitsStr != null && !unitsStr.isEmpty()) {
 	                try {
 	                    int units = Integer.parseInt(unitsStr);
-	                    units=newUnit;
+	                    units+=newUnit;
 	                    System.out.println("units "+units);
-	                    boolean updated = customerService.updateUnitsByAccountNumber(accountNumber, units);
+	                    boolean updated = customerService.updateUnitsByAccountNumberOrNic(accountNumber, units);
 
-	                    response.setContentType("application/json");
-	                    response.setCharacterEncoding("UTF-8");
+//	                    response.setContentType("application/json");
+//	                    response.setCharacterEncoding("UTF-8");
 
 	                    if (updated) {
-	                        response.getWriter().write("{\"success\":\"Units updated successfully\"}");
+//	                        response.getWriter().write("{\"success\":\"Units updated successfully\"}");
+	                    	 System.out.println("Units updated successfully");
 	                    } else {
-	                        response.getWriter().write("{\"error\":\"Update failed or customer not found\"}");
+//	                        response.getWriter().write("{\"error\":\"Update failed or customer not found\"}");
+	                    	System.out.println("Update failed or customer not found");
 	                    }
 
 	                } catch (NumberFormatException e) {
-	                    response.getWriter().write("{\"error\":\"Invalid units value\"}");
+//	                    response.getWriter().write("{\"error\":\"Invalid units value\"}");
+	                	System.out.println("Invalid units value");
 	                }
 	            } else {
-	                response.getWriter().write("{\"error\":\"Units value is missing\"}");
+//	                response.getWriter().write("{\"error\":\"Units value is missing\"}");
+	            	System.out.println("Units value is missing");
 	            }
 
 	            
@@ -248,6 +289,7 @@ public class InvoiceServlet extends HttpServlet {
 		        request.setAttribute("invoiceNo", nextInvoiceNo);
 	            request.setAttribute("message", "Invoice generated successfully!");
 	            request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
+//	            response.sendRedirect("InvoiceServlet?action=insert");
 	            System.out.println("Invoice generated successfully!");
 	            
 //	            String pdfPath = "D:\\invoices" + invoice.getInvoiceNo() + ".pdf";
@@ -268,7 +310,11 @@ public class InvoiceServlet extends HttpServlet {
 	            // Define the full PDF file path
 	            String pdfPath = new File(pdfDir, invoice.getInvoiceNo() + ".pdf").getAbsolutePath();
 
-	            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice, billList, pdfPath);
+	            //boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice, billList, pdfPath);
+	            
+	           // String filePath = request.getServletContext().getRealPath("/invoices/invoice.pdf");
+
+	            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(request, invoice, billList, pdfPath);
 
 				File pdfFile = new File(pdfPath);
 
@@ -317,11 +363,12 @@ public class InvoiceServlet extends HttpServlet {
 		        }
 
 		        double discount = Double.parseDouble(request.getParameter("discount"));
+		        int totalQty = Integer.parseInt(request.getParameter("totalQty"));
 		        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
 		        double cash = Double.parseDouble(request.getParameter("cash"));
 		        double balance = Double.parseDouble(request.getParameter("balance"));
 		        String status = "Pending";
-		        
+		       
 		        if(balance>=0) {
 		        	status = "Paid";
 		        }
@@ -333,7 +380,7 @@ public class InvoiceServlet extends HttpServlet {
 
 		        if (invoiceService.updateInvoice(invoice)) {
 		        	 Invoice invoice2 = new Invoice(invoiceNo, customerName, invoiceDate, dueDate,
-	                            discount, totalAmount, cash, balance, status);
+	                            discount,totalQty, totalAmount, cash, balance, status);
 		        	
 
 //		            List<BillDetail> billList = new ArrayList<>();
@@ -366,7 +413,9 @@ public class InvoiceServlet extends HttpServlet {
 		            // Define the full PDF file path
 		            String pdfPath = new File(pdfDir, invoice.getInvoiceNo() + ".pdf").getAbsolutePath();
 
-		            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice2, billList, pdfPath);
+		            //boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice2, billList, pdfPath);
+		            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(request,invoice2, billList, pdfPath);
+
 
 					File pdfFile = new File(pdfPath);
 
@@ -400,37 +449,112 @@ public class InvoiceServlet extends HttpServlet {
 
 	}
 
-	private void deleteInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException,ServletException {
+//	private void deleteInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException,ServletException {
+//	    String invoiceNo = request.getParameter("invoiceNo");
+//
+//
+//	    if (invoiceNo == null || invoiceNo.trim().isEmpty()) {
+//	        request.setAttribute("error", "Invalid invoive number.");
+//	    } else {
+//	    	
+//	    	try {
+//	        boolean deleted = invoiceService.deleteInvoice(invoiceNo);
+//	        if (deleted) {
+//	            request.setAttribute("message", "Invoive deleted successfully!");
+//	            
+//	            String totalQty = request.getParameter("totalQty");
+//	            String nic = request.getParameter("nic");
+//	            
+//	            int units = Integer.parseInt(totalQty);
+//	            
+//	            int currentUnits=customerService.getUnitsByNic(nic);
+//	            currentUnits-=units;
+//	            
+//	            boolean updated = customerService.updateUnitsByAccountNumberOrNic(nic, units);
+//
+////                response.setContentType("application/json");
+////                response.setCharacterEncoding("UTF-8");
+//
+//                if (updated) {
+////                    response.getWriter().write("{\"success\":\"Units updated successfully\"}");
+//                	 System.out.println("Units updated successfully");
+//                } else {
+////                    response.getWriter().write("{\"error\":\"Update failed or customer not found\"}");
+//                	System.out.println("Update failed or customer not found");
+//                } 
+//                
+//	        } else {
+//	            request.setAttribute("error", "Failed to delete invoice. Invoice may not exist.");
+//	        }
+//	        
+//	    	   } catch (Exception e) {
+//			        e.printStackTrace();
+//			        request.setAttribute("error", "Error deleting invoive: " + e.getMessage());
+//			        request.getRequestDispatcher("invoiceReport.jsp").forward(request, response);
+//			        System.out.println("Error deleting invoive: " + e.getMessage());
+//			    }
+//	    }
+//
+//	    // Reload updated item list
+//	    List<Invoice>invoices = invoiceService.getAllInvoices();
+//	    request.setAttribute("invoices", invoices);
+//
+//	    // Forward to JSP
+//	    request.getRequestDispatcher("invoiceReport.jsp").forward(request, response);
+//	}
+	
+	private void deleteInvoice(HttpServletRequest request, HttpServletResponse response) 
+	        throws IOException, ServletException {
+
 	    String invoiceNo = request.getParameter("invoiceNo");
 
-
 	    if (invoiceNo == null || invoiceNo.trim().isEmpty()) {
-	        request.setAttribute("error", "Invalid invoive number.");
+	        request.setAttribute("error", "Invalid invoice number.");
 	    } else {
-	    	
-	    	try {
-	        boolean deleted = invoiceService.deleteInvoice(invoiceNo);
-	        if (deleted) {
-	            request.setAttribute("message", "Invoive deleted successfully!");
-	        } else {
-	            request.setAttribute("error", "Failed to delete invoice. Invoice may not exist.");
+	        try {
+	            boolean deleted = invoiceService.deleteInvoice(invoiceNo);
+	            if (deleted) {
+	                request.setAttribute("message", "Invoice deleted successfully!");
+
+	                String totalQtyStr = request.getParameter("totalQty");
+	                String nic = request.getParameter("nic");
+
+	                int units = 0;
+	                try {
+	                    units = Integer.parseInt(totalQtyStr);
+	                } catch (NumberFormatException e) {
+	                    units = 0;
+	                }
+
+	                int currentUnits = customerService.getUnitsByNic(nic);
+	                currentUnits -= units;
+
+	                boolean updated = customerService.updateUnitsByAccountNumberOrNic(nic, currentUnits);
+
+	                if (updated) {
+	                    System.out.println("Units updated successfully");
+	                } else {
+	                    System.out.println("Update failed or customer not found");
+	                }
+
+	            } else {
+	                request.setAttribute("error", "Failed to delete invoice. Invoice may not exist.");
+	            }
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            request.setAttribute("error", "Error deleting invoice: " + e.getMessage());
 	        }
-	        
-	    	   } catch (Exception e) {
-			        e.printStackTrace();
-			        request.setAttribute("error", "Error deleting invoive: " + e.getMessage());
-			        request.getRequestDispatcher("invoiceReport.jsp").forward(request, response);
-			        System.out.println("Error deleting invoive: " + e.getMessage());
-			    }
 	    }
 
-	    // Reload updated item list
-	    List<Invoice>invoices = invoiceService.getAllInvoices();
+	    // Reload updated invoice list
+	    List<Invoice> invoices = invoiceService.getAllInvoices();
 	    request.setAttribute("invoices", invoices);
 
 	    // Forward to JSP
 	    request.getRequestDispatcher("invoiceReport.jsp").forward(request, response);
 	}
+
 
 	private void editInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
@@ -484,7 +608,107 @@ public class InvoiceServlet extends HttpServlet {
 	}
 	
 	
-	    
+	 private void exportExcel( HttpServletResponse response) throws IOException {
+		 
+		 List<Invoice> invoices = invoiceService.getAllInvoices();
+		 
+	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	        response.setHeader("Content-Disposition", "attachment; filename=invoices.xlsx");
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Invoices");
+	        
+	        // === Title ===
+	        Row titleRow = sheet.createRow(1);
+	        CellStyle titleStyle = workbook.createCellStyle();
+	        Font titleFont = workbook.createFont();
+	        titleFont.setBold(true);
+	        titleFont.setFontHeightInPoints((short)16);
+	        titleStyle.setFont(titleFont);
+
+	        sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0, 0, 0, 9));
+	        Cell titleCell = titleRow.createCell(0);
+	        titleCell.setCellValue("Invoice Report");
+	        titleCell.setCellStyle(titleStyle);
+
+	        CellStyle headerStyle = workbook.createCellStyle();
+	        Font headerFont = workbook.createFont();
+	        headerFont.setBold(true);                 
+	        headerFont.setFontHeightInPoints((short)12); 
+	        headerStyle.setFont(headerFont);
 
 
+	        Row header = sheet.createRow(1);
+	        String[] columns = {"Invoice No", "Customer Name", "NIC", "Invoice Date", "Due Date", "Discount", "Qty", "Amount", "Balance", "Status"};
+	        
+	        for (int i = 0; i < columns.length; i++) {
+	            Cell cell = header.createCell(i);  
+	            cell.setCellValue(columns[i]);    
+	            cell.setCellStyle(headerStyle);    
+	        }
+//	        for (int i = 0; i < columns.length; i++) {
+//	            header.createCell(i).setCellValue(columns[i]);
+//	        }
+
+	        int rowIdx = 1;
+	        for (Invoice inv : invoices) {
+	            Row row = sheet.createRow(rowIdx++);
+	            row.createCell(0).setCellValue(inv.getInvoiceNo());
+	            row.createCell(1).setCellValue(inv.getCustomerName());
+	            row.createCell(2).setCellValue(inv.getNic());
+	            row.createCell(3).setCellValue(inv.getInvoiceDate().toString());
+	            row.createCell(4).setCellValue(inv.getDueDate().toString());
+	            row.createCell(5).setCellValue(inv.getDiscount());
+	            row.createCell(6).setCellValue(inv.getTotalQty());
+	            row.createCell(7).setCellValue(inv.getTotalAmount());
+	            row.createCell(8).setCellValue(inv.getBalance());
+	            row.createCell(9).setCellValue(inv.getStatus());
+	        }
+
+	        workbook.write(response.getOutputStream());
+	        workbook.close();
+	    } 
+
+	 private void exportPDF( HttpServletResponse response) throws IOException {
+		 
+		 List<Invoice> invoices = invoiceService.getAllInvoices();
+		 
+	        response.setContentType("application/pdf");
+	        response.setHeader("Content-Disposition", "attachment; filename=invoices.pdf");
+
+	        try {
+	            Document document = new Document();
+	            PdfWriter.getInstance(document, response.getOutputStream());
+	            document.open();
+
+	            document.add(new Paragraph("Invoice Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)));
+	            document.add(new Paragraph(" ")); // empty line
+
+	            PdfPTable table = new PdfPTable(6);
+	            table.setWidthPercentage(100);
+	            String[] headers = {"Invoice No", "Customer", "NIC", "Invoice Date", "Due Date", "Discount", "Qty", "Amount", "Balance", "Status"};
+
+	            for (String header : headers) {
+	                table.addCell(new Phrase(header, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+	            }
+
+	            for (Invoice inv : invoices) {
+	                table.addCell(inv.getInvoiceNo());
+	                table.addCell(inv.getCustomerName());
+	                table.addCell(inv.getNic());
+	                table.addCell(inv.getInvoiceDate().toString());
+	                table.addCell(inv.getDueDate().toString());
+	                table.addCell(String.valueOf(inv.getDiscount()));
+	                table.addCell(String.valueOf(inv.getTotalQty()));
+	                table.addCell(String.valueOf(inv.getTotalAmount()));
+	                table.addCell(String.valueOf(inv.getBalance()));
+	                table.addCell(inv.getStatus());
+	            }
+
+	            document.add(table);
+	            document.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 }

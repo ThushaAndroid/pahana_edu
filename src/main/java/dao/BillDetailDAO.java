@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import connection.DBConnection;
+import connection.DBConnectionFactory;
 import model.BillDetail;
 
 public class BillDetailDAO {
@@ -14,7 +15,7 @@ public class BillDetailDAO {
     public boolean insertBillDetail(BillDetail bill) {
         String sql = "INSERT INTO bill_details (invoice_no, item_code, item_name, description, price, quantity, total) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, bill.getInvoiceNo());
@@ -37,7 +38,7 @@ public class BillDetailDAO {
         List<BillDetail> billList = new ArrayList<>();
         String sql = "SELECT * FROM bill_details WHERE invoice_no = ?";
 
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, invoiceNo);

@@ -26,7 +26,7 @@ public class ItemServiceTest {
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        itemService = new ItemService();
+        itemService = ItemService.getInstance();
         
        
         java.lang.reflect.Field daoField = ItemService.class.getDeclaredField("itemDAO");

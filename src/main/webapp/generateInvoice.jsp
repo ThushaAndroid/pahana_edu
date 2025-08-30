@@ -29,9 +29,11 @@
     <h3 class="register-title">Generate New Invoice</h3>
     
     
-    <form action="InvoiceServlet" method="post">
+   <form action="InvoiceServlet" method="post" onsubmit="return validateInvoice()">
+
         <input type="hidden" name="action" value="insert">
           <input type="hidden" id="unitsField" name="units" value="">
+           <input type="hidden" id="nic" name="nic">
 
         <div class="form-group">
             <label for="invoiceNo">Invoice No:</label><br>
@@ -100,10 +102,15 @@
             <label for="discount">Discount:</label><br>
             <input type="number" step="0.01" id="discount" name="discount" value="0.0">
         </div>
+        
+        <div class="form-group">
+            <label for="totalQty">Total Quantity:</label><br>
+            <input type="number" step="0" id="totalQty" name="totalQty" value="0" readonly>
+        </div>
 
         <div class="form-group">
             <label for="totalAmount">Total Amount:</label><br>
-            <input type="number" step="0.01" id="totalAmount" name="totalAmount" readonly>
+            <input type="number" step="0.01" id="totalAmount" name="totalAmount" value="0.0" readonly>
         </div>
         
         <div class="form-group">
@@ -113,7 +120,7 @@
 
         <div class="form-group">
             <label for="balance">Balance:</label><br>
-            <input type="number" step="0.01" id="balance" name="balance" readonly>
+            <input type="number" step="0.01" id="balance" name="balance" value="0.0" readonly>
         </div>
 
      <!--    <div class="form-group">
@@ -125,8 +132,9 @@
             </select>
         </div> -->
 
-       <button type="submit" class="btn">Generate</button> 
-       <!-- <button type="button" class="btn" onclick="validateAndSubmit()">Generate</button> -->
+     <button type="submit" class="btn">Generate</button>
+    <!--  <button type="button" class="btn" onclick="validateAndSubmit()">Generate</button>  -->
+     <!--   <button type="submit" name="action" value="generate" class="btn" onclick="validateAndSubmit()">Generate</button> -->
     </form>
 </div>
 
@@ -173,11 +181,33 @@
     
 </script>
 
+<script>
+function validateInvoice() {
+    const tableBody = document.querySelector("#invoiceTable tbody");
+    const rows = tableBody.querySelectorAll("tr");
+
+    if (rows.length === 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Please add at least one item before generating the invoice',
+            toast: true,
+            position: 'bottom-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+        return false; 
+    }
+
+    return true; 
+}
+</script>
+
 <!-- <script>
-function validateAndSubmit() {
-    const rows = document.querySelectorAll('#invoiceTable tbody tr');
-    
-    // Check if any items are added
+/* document.querySelector("form").addEventListener("submit", function(event) {
+	   // Check if any items are added
+	   
+	   const rows = document.querySelectorAll('#invoiceTable tbody tr');
+	   
     if (rows.length === 0) {
         alert('Please add at least one item before generating the invoice.');
         return;
@@ -188,18 +218,34 @@ function validateAndSubmit() {
     if (totalAmount <= 0) {
         alert('Invoice total must be greater than 0.');
         return;
+    } 
+}); */
+function validateAndSubmit() {
+    const rows = document.querySelectorAll('#invoiceTable tbody tr');
+    
+    // Check if any items are added
+    if (rows.length === 0) {
+        alert('Please add at least one item before generating the invoice.');
+        return;
     }
     
+    // Check if total amount is greater than 0
+ /*    const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
+    if (totalAmount <= 0) {
+        alert('Invoice total must be greater than 0.');
+        return;
+    } */
+    
     // Optional: Check for required fields
-    const cash = parseFloat(document.getElementById('cash').value) || 0;
+  /*   const cash = parseFloat(document.getElementById('cash').value) || 0;
     if (cash < totalAmount) {
         const confirmSubmit = confirm('Cash amount is less than total. Do you want to continue?');
         if (!confirmSubmit) return;
-    }
+    } */
     
     // All validations passed, submit the form
-    document.querySelector('form').submit();
-}
+   //document.querySelector('form').submit();
+    }
 </script> -->
 
 <script>
@@ -207,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const customerInput = document.getElementById('customerName');
     const customerSuggestions = document.getElementById('customerSuggestions');
     const customerIdInput = document.getElementById('accountNumber');
+    const customerNicInput = document.getElementById('nic');
     
     const itemInput = document.getElementById('item');
     const itemSuggestions = document.getElementById('itemSuggestions');
@@ -229,11 +276,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.length > 0) {
                 data.forEach(customer => {
                     const div = document.createElement('div');
-                    div.textContent = customer.name; 
+                   /*  div.textContent = customer.name;  */
+                        // If query looks numeric → show NIC, else show name
+                if (/^\d+$/.test(query)) {
+                    div.textContent = customer.nic;
+                } else {
+                    div.textContent = customer.name;
+                }
+
                     div.dataset.id = customer.accountNumber; 
                     div.addEventListener('click', function() {
                         customerInput.value = customer.name;
                         customerIdInput.value = customer.accountNumber;
+                        customerNicInput.value = customer.nic;
                         customerSuggestions.style.display = 'none';
                         
                         getCustomerUnits(customer.accountNumber);
@@ -265,7 +320,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.length > 0) {
                     data.forEach(item => {
                         const div = document.createElement('div');
+                        /* div.textContent = item.itemName; */
+                           if (/^\d+$/.test(query)) {
+                        // Numeric → likely item code
+                        div.textContent = item.itemCode;
+                    } else {
+                        // Text → likely item name
                         div.textContent = item.itemName;
+                    }
                         
                         div.dataset.code = item.itemCode;
                         div.dataset.name = item.itemName;
@@ -284,6 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 name: this.dataset.name,
                                 desc: this.dataset.desc,
                                 price: this.dataset.price,
+                                qty: this.dataset.qty  
                                
                             });
                             itemSuggestions.style.display = 'none';
@@ -313,7 +376,18 @@ document.addEventListener('DOMContentLoaded', function() {
     	        });
     	        return;
     	    }
-
+    	    
+    	    if (parseInt(item.qty) === 0) {
+    	        Swal.fire({
+    	            icon: 'warning',
+    	            title: 'Item quantity is empty',
+    	            toast: true,
+    	            position: 'bottom-end',
+    	            showConfirmButton: false,
+    	            timer: 2000
+    	        });
+    	        return;
+    	    }
     	    const row = document.createElement('tr');
     	    row.dataset.code = item.code;
 
@@ -342,23 +416,41 @@ document.addEventListener('DOMContentLoaded', function() {
     	    row.querySelector('.removeBtn').addEventListener('click', function () {
     	        // Get the row total before removing (use 'total' not 'itemTotal')
     	        const rowTotal = parseFloat(row.querySelector('.total').textContent) || 0;
+    	        const rowTotalQty = parseInt(row.querySelector('.buyQty').value) || 0;
+    	        
+    	        const discount = parseFloat(discountInput.value) || 0;
 
     	        // Update the invoice total
     	        const totalAmountInput = document.getElementById("totalAmount");
     	        let currentTotal = parseFloat(totalAmountInput.value) || 0;
     	        currentTotal -= rowTotal;
-
+    	        
+    	        //currentTotal -=discount;
     	        // Set updated total
     	        totalAmountInput.value = currentTotal.toFixed(2);
     	        
+    	        const totalQty = document.getElementById("totalQty");
+    	        let currentTotalQty = parseInt(totalQty.value) || 0;
+    	        currentTotalQty -= rowTotalQty;
+    	        
+    	        totalQty.value = currentTotalQty;
+    	        
     	        const cash = parseFloat(document.getElementById('cash').value) || 0;
-
+    	        
+    	        
         	    // Update balance
         	    const balance = cash-currentTotal;
         	    document.getElementById('balance').value = balance.toFixed(2);
         	    originalAmount = currentTotal;
+        	    
+        	   /*  document.getElementById('discount').value = 0.0 */
 
     	        // Remove row
+    	        if(currentTotalQty===0){
+    	        	document.getElementById('totalAmount').value = 0.0;
+    	        	document.getElementById('balance').value = 0.0;
+    	        }
+    	        
     	        row.remove();
     	    });
 
@@ -371,17 +463,27 @@ document.addEventListener('DOMContentLoaded', function() {
     	}
      
      function updateTotal() {
+    	    let totalQty = 0;
     	    let total = 0;
     	    const rows = document.querySelectorAll('#invoiceTable tbody tr');
     	    rows.forEach(row => {
     	        const price = parseFloat(row.querySelector('td:nth-child(4)').textContent) || 0;
     	        const qty = parseInt(row.querySelector('.buyQty').value) || 0;
     	        total += price * qty;
+    	        
+    	        totalQty+=qty;
     	    });
+    	    
+    	    const discount = parseFloat(document.getElementById('discount').value) || 0;
+    	    total-=discount;
+    	    
     	    document.getElementById('totalAmount').value = total.toFixed(2);
+    	    document.getElementById('totalQty').value = totalQty;
     	    
     	    const cash = parseFloat(document.getElementById('cash').value) || 0;
-
+    	    
+    	  
+    	    
     	    // Update balance
     	    const balance = cash-total;
     	    document.getElementById('balance').value = balance.toFixed(2);
@@ -504,6 +606,9 @@ function getCustomerUnits(accountNumber) {
 
 
 </script>
+
+
+
 
 </body>
 </html>

@@ -176,11 +176,24 @@ import dao.UserDAO;
 import model.User;
 
 public class UserService {
+	
+	private static volatile UserService instance;
 
     private UserDAO userDAO;
 
     public UserService() {
         this.userDAO = new UserDAO();
+    }
+    
+    public static UserService getInstance() {
+        if (instance == null) {
+            synchronized (UserService.class) {
+                if (instance == null) {
+                    instance = new UserService();
+                }
+            }
+        }
+        return instance;
     }
 
     // Add a new user

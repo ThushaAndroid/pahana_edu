@@ -22,7 +22,7 @@ public class LoginServiceTest {
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        loginService = new LoginService();
+        loginService = LoginService.getInstance();
         
         
         java.lang.reflect.Field daoField = LoginService.class.getDeclaredField("logingDAO");

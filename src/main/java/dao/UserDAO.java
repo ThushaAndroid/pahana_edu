@@ -7,13 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import connection.DBConnection;
+import connection.DBConnectionFactory;
 import model.User;
 
 public class UserDAO {
 
     public boolean addUser(User user) {
         String sql = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn =  DBConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, user.getUser_id());
             stmt.setString(2, user.getUsername());
@@ -28,7 +29,7 @@ public class UserDAO {
 
     public User getUserByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn =  DBConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
@@ -49,7 +50,7 @@ public class UserDAO {
     
 	public User getUserByPassword(String password) {
     String sql = "SELECT * FROM users WHERE password = ?";
-    try (Connection conn = DBConnection.getConnection();
+    try (Connection conn =  DBConnectionFactory.getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql)) {
         stmt.setString(1, password);
         ResultSet rs = stmt.executeQuery();
@@ -65,7 +66,7 @@ public class UserDAO {
 
     public User getUserById(String userId) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn =  DBConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, userId);
             ResultSet rs = stmt.executeQuery();
@@ -88,7 +89,7 @@ public class UserDAO {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";
 
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -109,7 +110,7 @@ public class UserDAO {
 
     public boolean deleteUserById(String userId) {
         String sql = "DELETE FROM users WHERE user_id=?";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, userId);
             return ps.executeUpdate() > 0;
@@ -121,7 +122,7 @@ public class UserDAO {
 
     public boolean updateUserStatus(String userId, String status) {
         String sql = "UPDATE users SET status=? WHERE user_id=?";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setString(2, userId);
@@ -134,7 +135,7 @@ public class UserDAO {
 
     public boolean updateUser(User user) {
         String sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn =  DBConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, user.getUsername());
@@ -153,7 +154,7 @@ public class UserDAO {
         String prefix = "USR";
         String newUserId = prefix + "0001"; // default if no users yet
 
-        try (Connection conn = DBConnection.getConnection()) {
+        try (Connection conn =  DBConnectionFactory.getConnection()) {
             String sql = "SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {

@@ -32,36 +32,36 @@
         <div class="form-group">
             <label for="nic">NIC Number:</label><br>
             <input type="text" id="nic" name="nic" 
-                   value="<%= customer != null ? customer.getNic() : "" %>" required>
+                   value="<%= customer != null ? customer.getNic() : "" %>" readonly>
         </div>
 
         <div class="form-group">
             <label for="name">Name:</label><br>
             <input type="text" id="name" name="name" 
-                   value="<%= customer != null ? customer.getName() : "" %>" required>
+                   value="<%= customer != null ? customer.getName() : "" %>" readonly>
         </div>
 
         <div class="form-group">
             <label for="address">Address:</label><br>
-            <textarea id="address" name="address" rows="3" required><%= customer != null ? customer.getAddress() : "" %></textarea>
+            <textarea id="address" name="address" rows="3" readonly><%= customer != null ? customer.getAddress() : "" %></textarea>
         </div>
 
         <div class="form-group">
             <label for="telephone">Telephone:</label><br>
             <input type="text" id="telephone" name="telephone" 
-                   value="<%= customer != null ? customer.getTelephone() : "" %>" required>
+                   value="<%= customer != null ? customer.getTelephone() : "" %>" readonly>
         </div>
 
         <div class="form-group">
             <label for="email">Email:</label><br>
             <input type="email" id="email" name="email" 
-                   value="<%= customer != null ? customer.getEmail() : "" %>" required>
+                   value="<%= customer != null ? customer.getEmail() : "" %>" readonly>
         </div>
         
           <div class="form-group">
             <label for="unit">units Consumed:</label><br>
             <input type="number" id="unit" name="unit" 
-                   value="<%= customer != null ? customer.getUnitsConsumed() : "" %>" required>
+                   value="<%= customer != null ? customer.getUnitsConsumed() : "" %>" readonly>
         </div>
 
       <!--   <button type="submit">Update Customer</button> -->

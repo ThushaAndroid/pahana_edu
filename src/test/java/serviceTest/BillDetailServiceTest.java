@@ -28,7 +28,7 @@ public class BillDetailServiceTest {
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        billDetailService = new BillDetailService();
+        billDetailService = BillDetailService.getInstance();
         
       
         java.lang.reflect.Field daoField = BillDetailService.class.getDeclaredField("billDetailDAO");

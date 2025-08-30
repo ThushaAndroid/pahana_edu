@@ -7,9 +7,11 @@ public class Invoice {
 
     private String invoiceNo;
     private String customerName;
+    private String nic;
     private Date invoiceDate;       // invoice date
     private Date dueDate;
     private double discount;  // payment due date
+    private int totalQty;
     private double totalAmount;
     private double cash;// total invoice amount
     private double balance;  // remaining unpaid balance
@@ -19,7 +21,7 @@ public class Invoice {
         super();
     }
 
-	public Invoice(String invoiceNo, String customerName, Date invoiceDate, Date dueDate, double discount,
+	public Invoice(String invoiceNo, String customerName, Date invoiceDate, Date dueDate, double discount, int totalQty,
 			double totalAmount, double cash, double balance, String status) {
 		super();
 		this.invoiceNo = invoiceNo;
@@ -27,11 +29,13 @@ public class Invoice {
 		this.invoiceDate = invoiceDate;
 		this.dueDate = dueDate;
 		this.discount = discount;
+		this.totalQty = totalQty;
 		this.totalAmount = totalAmount;
 		this.cash = cash;
 		this.balance = balance;
 		this.status = status;
 	}
+    
 
 
 	public Invoice(String invoiceNo, Date dueDate, double cash, double balance, String status) {
@@ -42,6 +46,22 @@ public class Invoice {
 		this.balance = balance;
 		this.status = status;
 	}
+
+	public Invoice(String invoiceNo, String customerName, String nic, Date invoiceDate, Date dueDate, double discount, int totalQty,
+		double totalAmount, double cash, double balance, String status) {
+	super();
+	this.invoiceNo = invoiceNo;
+	this.customerName = customerName;
+	this.nic = nic;
+	this.invoiceDate = invoiceDate;
+	this.dueDate = dueDate;
+	this.discount = discount;
+	this.totalQty = totalQty;
+	this.totalAmount = totalAmount;
+	this.cash = cash;
+	this.balance = balance;
+	this.status = status;
+}
 
 	public String getInvoiceNo() {
 		return invoiceNo;
@@ -113,6 +133,22 @@ public class Invoice {
 
 	public void setCash(double cash) {
 		this.cash = cash;
+	}
+
+	public String getNic() {
+		return nic;
+	}
+
+	public void setNic(String nic) {
+		this.nic = nic;
+	}
+
+	public int getTotalQty() {
+		return totalQty;
+	}
+
+	public void setTotalQty(int totalQty) {
+		this.totalQty = totalQty;
 	}
     
 }

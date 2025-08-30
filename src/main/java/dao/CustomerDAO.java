@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import connection.DBConnection;
+import connection.DBConnectionFactory;
 import model.Customer;
 
 public class CustomerDAO {
@@ -15,7 +16,7 @@ public class CustomerDAO {
         String prefix = "CUST";
         String newAccountNumber = prefix + "001";
 
-        try (Connection conn = DBConnection.getConnection()) {
+        try (Connection conn =  DBConnectionFactory.getConnection()) {
             String sql = "SELECT account_number FROM customers ORDER BY account_number DESC LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {
@@ -36,7 +37,7 @@ public class CustomerDAO {
     public boolean addCustomer(Customer customer) {
         String sql = "INSERT INTO customers (account_number, nic, name, address, telephone, email, units_consumed) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, customer.getAccountNumber());
@@ -57,7 +58,7 @@ public class CustomerDAO {
 
     public Customer getCustomerByNIC(String nic) {
         String sql = "SELECT * FROM customers WHERE nic=?";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, nic);
@@ -74,7 +75,7 @@ public class CustomerDAO {
 
     public Customer getCustomerByAccount(String accountNumber) {
         String sql = "SELECT * FROM customers WHERE account_number=?";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, accountNumber);
@@ -91,7 +92,7 @@ public class CustomerDAO {
 
     public boolean updateCustomer(Customer customer) {
         String sql = "UPDATE customers SET nic=?, name=?, address=?, telephone=?, email=?, units_consumed=? WHERE account_number=?";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, customer.getNic());
@@ -112,7 +113,7 @@ public class CustomerDAO {
 
     public boolean deleteCustomer(String accountNumber) {
         String sql = "DELETE FROM customers WHERE account_number=?";
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, accountNumber);
@@ -128,7 +129,7 @@ public class CustomerDAO {
         List<Customer> customers = new ArrayList<>();
         String sql = "SELECT * FROM customers";
 
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -144,14 +145,15 @@ public class CustomerDAO {
 
     public List<Customer> searchCustomers(String query) {
         List<Customer> customers = new ArrayList<>();
-        String sql = "SELECT * FROM customers WHERE name LIKE ? OR email LIKE ?";
+        String sql = "SELECT * FROM customers WHERE name LIKE ? OR email LIKE ? OR nic LIKE ?";
 
-        try (Connection con = DBConnection.getConnection();
+        try (Connection con =  DBConnectionFactory.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             String searchTerm = "%" + query + "%";
             ps.setString(1, searchTerm);
             ps.setString(2, searchTerm);
+            ps.setString(3, searchTerm);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -181,7 +183,7 @@ public class CustomerDAO {
  // In CustomerDAO.java
     public Integer getUnitsByAccountNumber(String accountNumber) {
         String sql = "SELECT units_consumed FROM customers WHERE account_number = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn =  DBConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, accountNumber);
@@ -196,17 +198,54 @@ public class CustomerDAO {
         return null; // return null if not found
     }
     
+    public Integer getUnitsByNic(String nic) {
+    	 String sql = "SELECT units_consumed FROM customers WHERE nic = ?";
+         try (Connection conn =  DBConnectionFactory.getConnection();
+              PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+             ps.setString(1, nic);
+             ResultSet rs = ps.executeQuery();
+             
+             if (rs.next()) {
+                 return rs.getInt("units_consumed");
+             }
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+         return null; // return null if not found
+    }
     
     
-    public boolean updateUnitsByAccountNumber(String accountNumber, int units) {
-        String sql = "UPDATE customers SET units_consumed = ? WHERE account_number = ?";
+    
+//    public boolean updateUnitsByAccountNumber(String accountNumber, int units) {
+//        String sql = "UPDATE customers SET units_consumed = ? WHERE account_number = ?";
+//        
+//        try (Connection conn = DBConnection.getConnection();
+//             PreparedStatement ps = conn.prepareStatement(sql)) {
+//            
+//            ps.setInt(1, units);
+//            ps.setString(2, accountNumber);
+//            
+//            int rowsUpdated = ps.executeUpdate();
+//            return rowsUpdated > 0; // true if update succeeded
+//            
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        
+//        return false; // update failed
+//    }
+    
+    public boolean updateUnitsByAccountNumberOrNic(String accountNumberOrNic, int units) {
+        String sql = "UPDATE customers SET units_consumed = ? WHERE account_number = ? OR nic = ?";
         
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn =  DBConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, units);
-            ps.setString(2, accountNumber);
-            
+            ps.setString(2, accountNumberOrNic); // account_number
+            ps.setString(3, accountNumberOrNic); // nic
+
             int rowsUpdated = ps.executeUpdate();
             return rowsUpdated > 0; // true if update succeeded
             
@@ -216,6 +255,7 @@ public class CustomerDAO {
         
         return false; // update failed
     }
+
 
 
 }
