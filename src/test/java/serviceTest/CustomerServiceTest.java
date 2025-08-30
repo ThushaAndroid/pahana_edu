@@ -49,11 +49,11 @@ public class CustomerServiceTest {
     public void testAddCustomer() {
         // Arrange
         Customer customer = new Customer();
-        customer.setName("John Doe");
-        customer.setNic("123456789V");
-        customer.setAddress("Test Address");
+        customer.setName("Saman");
+        customer.setNic("978976234V");
+        customer.setAddress("Kegalle");
         customer.setTelephone("077126787");
-        customer.setEmail("john@test.com");
+        customer.setEmail("saman@test.com");
         
         when(customerDAOMock.generateNextAccountNumber()).thenReturn("CUST011");
         when(customerDAOMock.addCustomer(any(Customer.class))).thenReturn(true);
@@ -71,14 +71,14 @@ public class CustomerServiceTest {
     @Test
     public void testGetCustomerByNIC() {
      
-        String nic = "123456789V";
+        String nic = "978976234V";
         Customer expectedCustomer = new Customer();
         expectedCustomer.setAccountNumber("CUST001");
         expectedCustomer.setNic(nic);
-        expectedCustomer.setName("Alice");
-        expectedCustomer.setAddress("Street 1");
-        expectedCustomer.setTelephone("0773464567");
-        expectedCustomer.setEmail("alice@test.com");
+        expectedCustomer.setName("Saman");
+        expectedCustomer.setAddress("Kegalle");
+        expectedCustomer.setTelephone("077126787");
+        expectedCustomer.setEmail("saman@test.com");
         
         when(customerDAOMock.getCustomerByNIC(nic)).thenReturn(expectedCustomer);
         
@@ -87,7 +87,7 @@ public class CustomerServiceTest {
         
        
         assertNotNull(result);
-        assertEquals("Alice", result.getName());
+        assertEquals("Saman", result.getName());
         assertEquals(nic, result.getNic());
         verify(customerDAOMock, times(1)).getCustomerByNIC(nic);
     }
@@ -97,16 +97,16 @@ public class CustomerServiceTest {
       
         Customer c1 = new Customer();
         c1.setAccountNumber("CUST001");
-        c1.setNic("NIC1");
-        c1.setName("Alice");
+        c1.setNic("201234567890");
+        c1.setName("Amal");
         c1.setAddress("Addr1");
         c1.setTelephone("0774554567");
         c1.setEmail("a@test.com");
         
         Customer c2 = new Customer();
         c2.setAccountNumber("CUST002");
-        c2.setNic("NIC2");
-        c2.setName("Bob");
+        c2.setNic("201234567845");
+        c2.setName("Bro");
         c2.setAddress("Addr2");
         c2.setTelephone("0771234567");
         c2.setEmail("b@test.com");
@@ -120,8 +120,8 @@ public class CustomerServiceTest {
         
         assertNotNull(customers);
         assertEquals(2, customers.size());
-        assertEquals("Alice", customers.get(0).getName());
-        assertEquals("Bob", customers.get(1).getName());
+        assertEquals("Amal", customers.get(0).getName());
+        assertEquals("Bro", customers.get(1).getName());
         verify(customerDAOMock, times(1)).getAllCustomers();
     }
 }

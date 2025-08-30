@@ -122,9 +122,9 @@ document.querySelector("form").addEventListener("submit", function(event) {
     let tel = document.getElementById("telephone").value.trim();
 
     if (!validateNIC(nic)) {
-      /*   event.preventDefault();
+       event.preventDefault();
         
-        alert('NIC must be either 9 digits + V/X or 12 digits.'); */
+        //alert('NIC must be either 9 digits + V/X or 12 digits.');
         Swal.fire({
             icon: 'error',
             title: 'NIC must be either 9 digits + V/X or 12 digits.',
@@ -137,9 +137,9 @@ document.querySelector("form").addEventListener("submit", function(event) {
     }
 
     if (!validateTelephone(tel)) {
-       /*  event.preventDefault();
+       event.preventDefault();
        
-        alert('Telephone must be 10 digits and start with 0 or Telephone must be 12 digits and start with +94'); */
+        //alert('Telephone must be 10 digits and start with 0 or Telephone must be 12 digits and start with +94');
         Swal.fire({
             icon: 'error',
             title: 'Telephone must be 10 digits and start with 0 or Telephone must be 12 digits and start with +94',

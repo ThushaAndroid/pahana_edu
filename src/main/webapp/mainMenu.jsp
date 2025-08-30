@@ -6,9 +6,10 @@
 
 <%
    
-    InvoiceService service = new InvoiceService();
-
-    List<Invoice> invoices = service.getAllInvoices();
+   /*  InvoiceService service = new InvoiceService();
+ */
+ InvoiceService invoiceService = InvoiceService.getInstance();
+    List<Invoice> invoices = invoiceService.getAllInvoices();
 
   
 %>

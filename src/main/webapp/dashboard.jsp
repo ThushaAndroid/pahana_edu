@@ -1,5 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page session="true" %>
+<%@ page import="java.util.List" %>
+<%@ page import="model.Item" %>
+<%@ page import="service.ItemService" %>
+<%@ page import="model.Invoice" %>
+<%@ page import="service.InvoiceService" %>
 <%
     String username = (String) session.getAttribute("username");
     String role = (String) session.getAttribute("role");
@@ -13,6 +18,46 @@
         response.sendRedirect("login.jsp");
         return;
     }
+   /*  ItemService itemService = ItemService.getInstance();;
+    List<Item>items=itemService.getItemsNameNQty();
+    if(items!=null){
+    	for(Item item:items){
+    		System.out.println("Item name "+item.getItemName() + " Item qty "+item.getQuantity());
+    	}
+    } */
+    
+    int notificationCount = 0;
+    
+    ItemService itemService = ItemService.getInstance();
+    List<Item> items = itemService.getItemsNameNQty();
+   /*  int notificationCount = 0; */
+   
+   if(roleName=="Admin"){
+    if (items != null) {
+        for (Item item : items) {
+            if (item.getQuantity() == 0) {   // or use <= 5 for low stock warning
+                notificationCount++;
+            }
+        }
+    }
+   }
+    
+    InvoiceService invoiceServices = InvoiceService.getInstance();
+    List<Invoice> invoiceStatus = invoiceServices.getInvoicesStatusNDue();
+
+    if (invoiceStatus != null) {
+        java.util.Date today = new java.util.Date(); // current date
+
+        for (Invoice invoice : invoiceStatus) {
+            if ("Pending".equals(invoice.getStatus()) 
+                    && invoice.getDueDate() != null 
+                    && invoice.getDueDate().before(today)) {
+                notificationCount++;
+            }
+        }
+    }
+
+
 %>
 <!DOCTYPE html>
 <html>
@@ -37,6 +82,11 @@
         popup.classList.toggle("open");
     }
     
+    function notification() {
+        const popup = document.getElementById("notificationPopup");
+        popup.classList.toggle("open");
+    }
+    
     function openHelp() {
         window.location.href = "help.jsp"; 
     }
@@ -50,6 +100,7 @@
     document.addEventListener("click", function(event) {
         const profilePopup = document.getElementById("profilePopup");
         const menuDropdown = document.getElementById("menuDropdown");
+        const notificationPopup = document.getElementById("notificationPopup");
 
         if (!event.target.closest("#profilePopup") && !event.target.closest("[title='Profile']")) {
             profilePopup.classList.remove("open");
@@ -57,16 +108,24 @@
         if (!event.target.closest("#menuDropdown") && !event.target.closest("[onclick='setMenu()']")) {
             menuDropdown.classList.remove("open");
         }
+        if (!event.target.closest("#notificationPopup") && !event.target.closest("[title='You have <%= notificationCount %> notifications']")) {
+            notificationPopup.classList.remove("open");
+        }
+
     });
 </script>
 
 <style>
     /* Better toggle handling with CSS class */
     .open { display: block !important; }
-    #profilePopup, #menuDropdown, #transactionMenu, #operationMenu, #reportMenu {
+    #profilePopup, #menuDropdown, #notificationPopup, #transactionMenu, #operationMenu, #reportMenu {
         display: none;
     }
-</style>
+     
+</style>   
+
+
+
 </head>
 <body>
 
@@ -78,7 +137,15 @@
     <div class="top-bar-right">
         <div id="desktopIcon" class="desktop_icon">
             <button class="icon-btn" onclick="refreshPage()" title="Refresh">🔄</button>
-            <button class="icon-btn" title="Notifications">🔔</button>
+           <!--  <button class="icon-btn" onclick="notification()" title="Notifications">🔔</button> -->
+           <button class="icon-btn" onclick="notification()" title="You have <%= notificationCount %> notifications">
+    🔔
+    <% if (notificationCount > 0) { %>
+        <span class="notification-badge"><%= notificationCount %></span>
+    <% } %>
+</button>
+           
+
             <button class="icon-btn" title="Settings">⚙️</button>
             <button class="icon-btn" onclick="userProfile()" title="Profile">👤</button>
             <button class="icon-btn" onclick="openHelp()" title="Help">❓</button>
@@ -89,7 +156,13 @@
     <!-- Dropdown Menu -->
     <div id="menuDropdown" class="menu-dropdown">
         <button class="icon-btn" onclick="refreshPage()">🔄</button>
-        <button class="icon-btn" title="Notifications">🔔</button>
+        <!-- <button class="icon-btn" title="Notifications">🔔</button> -->
+        <button class="icon-btn" onclick="notification()" title="You have <%= notificationCount %> notifications">
+    🔔
+    <% if (notificationCount > 0) { %>
+        <span class="notification-badge"><%= notificationCount %></span>
+    <% } %>
+</button>
         <button class="icon-btn" title="Settings">⚙️</button>
         <button class="icon-btn" onclick="userProfile()" title="Profile">👤</button>
         <button class="icon-btn" onclick="openHelp()" title="Help">❓</button>
@@ -108,25 +181,65 @@
 
     <!-- Transaction Menu -->
     <button onclick="toggleMenu('transactionMenu')">Invoice</button>
-    <div id="transactionMenu" style="padding-left:10px;">
+    <!-- <div id="transactionMenu" style="padding-left:10px;">
     <form action="InvoiceServlet" method="get">
      <input type="hidden" name="action" value="invoice">
-            <button type="submit" class="btn">Generate Bill</button>
+          <button type="submit" class="btn" >Generate Bill</button>
+
+
         </form>
-    <!-- <a href="generateInvoice.jsp" class="button-link">Generate Invoice</a> -->
-   
-       <!--  <a href="#" class="button-link">View Bills</a>
-        <a href="#" class="button-link">Generate Bill</a> -->
-    </div>
+    
+    </div> -->
+<div id="transactionMenu" style="padding-left:10px;">
+    <button type="button" class="btn" onclick="openInvoicePopup('InvoiceServlet?action=invoice')">Generate Bill</button>
+</div>
+
+<script>
+function openInvoicePopup(url) {
+    const w = screen.width;
+    const h = screen.height;
+
+    window.open(
+    	 url,  
+    	"popupWindow",         
+        "width=" + w + ",height=" + h + ",top=0,left=0,scrollbars=yes,resizable=yes"
+    );
+}
+</script>
+
+    
+    
+
 
     <% if ("Admin".equals(roleName)) { %>
     <!-- Operation Menu -->
-    <button onclick="toggleMenu('operationMenu')">Operation</button>
+    <!-- <button onclick="toggleMenu('operationMenu')">Operation</button>
     <div id="operationMenu" style="padding-left:10px;">
         <a href="userRegister.jsp" class="button-link">Register Users</a>
         <a href="customerRegister.jsp" class="button-link">Register Customers</a>
         <a href="addItem.jsp" class="button-link">Add Items</a>
-    </div>
+    </div> -->
+    <button onclick="toggleMenu('operationMenu')">Operation</button>
+<div id="operationMenu" style="padding-left:10px;">
+    <a href="javascript:void(0)" class="button-link" onclick="openPopup('userRegister.jsp')">Register Users</a>
+    <a href="javascript:void(0)" class="button-link" onclick="openPopup('customerRegister.jsp')">Register Customers</a>
+    <a href="javascript:void(0)" class="button-link" onclick="openPopup('addItem.jsp')">Add Items</a>
+</div>
+
+<script>
+function openPopup(url) {
+	
+	   const w = screen.width;
+	   const h = screen.height;
+	    
+    window.open(
+        url,
+        "popupWindow",
+        "width=" + w + ",height=" + h + ",top=0,left=0,scrollbars=yes,resizable=yes"
+    );
+}
+</script>
+    
     <% } %>
 
     <!-- Reports Menu -->
@@ -134,7 +247,31 @@
     <div id="reportMenu" style="padding-left:10px;">
     
       <% if ("Admin".equals(roleName)) { %>
-        <form action="UserServlet" method="get">
+      
+       <button type="button" class="btn" onclick="openPopup('UserServlet?action=userReport')">User Report</button>
+
+    <button type="button" class="btn" onclick="openPopup('CustomerServlet?roleName=<%= roleName %>')">Customer Report</button>
+
+    <button type="button" class="btn" onclick="openPopup('ItemServlet?action=itemReport')">Item Report</button>
+
+    <button type="button" class="btn" onclick="openPopup('InvoiceServlet?action=invoiceReport')">Invoice Report</button>
+<!-- </div> -->
+
+
+<script>
+function openPopup(url) {
+	
+	   const w = screen.width;
+	   const h = screen.height;
+	    
+ window.open(
+     url,
+     "popupWindow",
+     "width=" + w + ",height=" + h + ",top=0,left=0,scrollbars=yes,resizable=yes"
+ );
+}
+</script>
+<%--         <form action="UserServlet" method="get">
       
 
             <button type="submit" class="btn">User Report</button>
@@ -156,16 +293,31 @@
       
 
             <button type="submit" class="btn">Invoice Report</button>
-        </form>
+        </form> --%>
         
           <% }else{
         	  %>
-        	  
+
+		<button type="button" class="btn"
+			onclick="openPopup('CustomerServlet?roleName=<%=roleName%>')">Customer
+			Report</button>
+
+		<script>
+			function openPopup(url) {
+
+				const w = screen.width;
+				const h = screen.height;
+
+				window.open(url, "popupWindow", "width=" + w + ",height=" + h
+						+ ",top=0,left=0,scrollbars=yes,resizable=yes");
+			}
+		</script>
+		<%-- 	  
         	    <form action="CustomerServlet" method="get">
          <input type="hidden" name="roleName" value="<%= roleName %>">
 
             <button type="submit" class="btn">Customer Report</button>
-        </form>
+        </form> --%>
            <% } %>
         
         
@@ -179,7 +331,7 @@
     <div class="space">
    
     </div>
-</div>
+</div> 
 
 
 
@@ -197,6 +349,81 @@
     <hr>
     <a href="logout" class="logout-btn">Logout</a>
 </div>
+
+<!-- notification Popup -->
+<%-- <div id="notificationPopup" class="notification-popup">
+    <p><strong><%= item.getItemName() %></strong></p>
+    <small>(<%= item.getQuantity() %>)</small>
+    <hr>
+   <!--  <a href="logout" class="logout-btn">Logout</a> -->
+</div> --%>
+<%-- <div id="notificationPopup" class="notification-popup">
+    <% 
+   
+        if (items != null && !items.isEmpty()) {
+            for (Item item : items) {
+                if (item.getQuantity() == 0) {  // ✅ Properly inside Java block
+                	/* notificationCount++; */
+    %>
+                    <p><strong><%= item.getItemName() %></strong></p>
+                    <small>(Qty: <%= item.getQuantity() %>)</small>
+                    <hr>
+                    
+    <% 
+                }
+            }
+        } else {
+    %>
+        <p>No notifications</p>
+    <% 
+        } 
+    %>
+</div> --%>
+
+<div id="notificationPopup" class="notification-popup">
+    <% 
+    if ("Admin".equals(roleName)) {
+        // Show item notifications
+        if (items != null && !items.isEmpty()) {
+            for (Item item : items) {
+                if (item.getQuantity() == 0) {  
+    %>
+                    <p><strong><%= item.getItemName() %></strong></p>
+                    <small>(Qty: <%= item.getQuantity() %>)</small>
+                    <hr>
+    <% 
+                }
+            }
+        }
+        
+    }
+
+        // Show invoice notifications
+        if (invoiceStatus != null) {
+            java.util.Date today = new java.util.Date(); // current date
+            for (Invoice invoice : invoiceStatus) {
+                if ("Pending".equals(invoice.getStatus()) 
+                        && invoice.getDueDate() != null 
+                        && invoice.getDueDate().before(today)) {  
+    %>
+                    <p><strong>Invoice No: <%= invoice.getInvoiceNo() %></strong></p>
+                    <small>(Overdue date: <%= invoice.getDueDate() %>)</small>
+                    <hr>
+    <% 
+                }
+            }
+        }
+
+        // If no notifications at all
+        if ((items == null || items.isEmpty()) && (invoiceStatus == null || invoiceStatus.isEmpty())) {
+    %>
+            <p>No notifications</p>
+    <% 
+        }
+    %>
+</div>
+
+
 
 </body>
 </html>

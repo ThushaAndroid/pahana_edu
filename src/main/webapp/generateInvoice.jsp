@@ -2,10 +2,14 @@
 <%@ page import="java.util.List" %>
 <%@ page import="model.Item" %>
 <%@ page import="model.Customer" %>
+<%-- <%@ page import="model.Invoice" %>
+<%@ page import="service.InvoiceService" %> --%>
 <%
-    String nextInvoiceNo = (String) request.getAttribute("invoiceNo");
+   String nextInvoiceNo = (String) request.getAttribute("invoiceNo");
     List<Item> items = (List<Item>) request.getAttribute("items");
    /*  List<Customer> customers = (List<Customer>) request.getAttribute("customers"); */
+   /* InvoiceService invoiceServices = InvoiceService.getInstance();
+    String nextInvoiceNo = invoiceServices.generateNextInvoiceNo(); */
 %>
 <!DOCTYPE html>
 <html>

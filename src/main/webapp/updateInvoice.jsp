@@ -123,7 +123,7 @@
         
          <div class="form-group">
             <label for="cash">Cash:</label><br>
-            <input type="number" step="0.01" id="cash" name="cash">
+            <input type="number" step="0.01" id="cash" name="cash" value="0.0">
         </div>
 
         <!-- Balance -->

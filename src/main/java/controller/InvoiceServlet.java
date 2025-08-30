@@ -82,9 +82,9 @@ public class InvoiceServlet extends HttpServlet {
 			case "pdf":
 				exportPDF( response);
 				break;
-			case "insert":
-				insertInvoice(request, response);
-				break;
+//			case "insert":
+//				insertInvoice(request, response);
+//				break;
 			default:
 				listInvoices(request, response);
 				break;
@@ -288,9 +288,16 @@ public class InvoiceServlet extends HttpServlet {
 	            String nextInvoiceNo = invoiceService.generateNextInvoiceNo();
 		        request.setAttribute("invoiceNo", nextInvoiceNo);
 	            request.setAttribute("message", "Invoice generated successfully!");
-	            request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
+	            //request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);
 //	            response.sendRedirect("InvoiceServlet?action=insert");
 	            System.out.println("Invoice generated successfully!");
+	            
+	            // Reload updated invoice list
+			    List<Invoice> invoices = invoiceService.getAllInvoices();
+			    request.setAttribute("invoices", invoices);
+
+			    // Forward to JSP
+			    request.getRequestDispatcher("invoiceReport.jsp").forward(request, response);
 	            
 //	            String pdfPath = "D:\\invoices" + invoice.getInvoiceNo() + ".pdf";
 	            
@@ -390,10 +397,17 @@ public class InvoiceServlet extends HttpServlet {
 
 		            
   
-			        request.setAttribute("invoiceNo", invoiceNo);
+			        //request.setAttribute("invoiceNo", invoiceNo);
 		            request.setAttribute("message", "Invoice updated successfully!");
-		            request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
+		            //request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
 		            System.out.println("Invoice updated successfully!");
+		            
+		            // Reload updated invoice list
+				    List<Invoice> invoices = invoiceService.getAllInvoices();
+				    request.setAttribute("invoices", invoices);
+
+				    // Forward to JSP
+				    request.getRequestDispatcher("invoiceReport.jsp").forward(request, response);
 		            
 //		            String pdfPath = "D:\\invoices" + invoice.getInvoiceNo() + ".pdf";
 		            
@@ -445,7 +459,7 @@ public class InvoiceServlet extends HttpServlet {
 		        System.out.println("Error updating invoice: " + e.getMessage());
 		    }
 		  
-		  
+		
 
 	}
 
@@ -512,6 +526,24 @@ public class InvoiceServlet extends HttpServlet {
 	        request.setAttribute("error", "Invalid invoice number.");
 	    } else {
 	        try {
+	        	
+	        	   // Fetch bill details related to the invoice
+	            List<BillDetail> billDetails = billService.getBillDetailsByInvoice(invoiceNo);
+
+	            // Roll back units consumed for each bill detail
+	            for (BillDetail detail : billDetails) {
+	                String item_code = detail.getItemCode(); // assuming BillDetail has customer NIC
+	                int qty = detail.getQuantity(); // assuming BillDetail has qty
+	                
+	                
+	                boolean updateQty =itemService.increaseItemQty(item_code,qty);
+	                if (updateQty) {
+	                	 System.out.println("qty updated item_code " +item_code+ " qty " +qty+" successfully");
+	                }else {
+	                    System.out.println("failed to update qty");
+	                }
+	            }
+	                
 	            boolean deleted = invoiceService.deleteInvoice(invoiceNo);
 	            if (deleted) {
 	                request.setAttribute("message", "Invoice deleted successfully!");
@@ -619,7 +651,7 @@ public class InvoiceServlet extends HttpServlet {
 	        Sheet sheet = workbook.createSheet("Invoices");
 	        
 	        // === Title ===
-	        Row titleRow = sheet.createRow(1);
+	        Row titleRow = sheet.createRow(0);
 	        CellStyle titleStyle = workbook.createCellStyle();
 	        Font titleFont = workbook.createFont();
 	        titleFont.setBold(true);
@@ -650,7 +682,7 @@ public class InvoiceServlet extends HttpServlet {
 //	            header.createCell(i).setCellValue(columns[i]);
 //	        }
 
-	        int rowIdx = 1;
+	        int rowIdx = 2;
 	        for (Invoice inv : invoices) {
 	            Row row = sheet.createRow(rowIdx++);
 	            row.createCell(0).setCellValue(inv.getInvoiceNo());

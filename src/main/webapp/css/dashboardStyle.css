@@ -343,6 +343,79 @@ a:hover {
 }
 
 
+.notification-popup {
+    display: none;
+    position: absolute;
+    top: 50px;       /* just below the top-bar */
+    right: 20px;     /* align to right corner */
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    padding: 10px;
+    z-index: 9999;   /* above top-bar */
+}
+.notification-popup p {
+    margin: 5px 0;
+}
+.notification-popup small {
+    color: gray;
+    font-size: 12px;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -6px;       /* adjust to sit above 🔔 */
+    right: -6px;     /* adjust to sit on corner */
+    background: red;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 50%;
+    line-height: 1;
+    min-width: 17px;  /* keeps it round even with "12" */
+    height: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+.icon-btn {
+    position: relative;  /* ✅ so badge stays inside button */
+}
+
+/* .notification-popup { 
+   display: none;
+    position: absolute;
+    top: 60px; just below the top bar
+    right: 15px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    padding: 10px 15px;
+    z-index: 2000;
+    min-width: 150px;
+    } */
+    
+/* .notification-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+} */
+    
+
 /* ===== Global Styles ===== */
 /* body {
     font-family: Arial, sans-serif;

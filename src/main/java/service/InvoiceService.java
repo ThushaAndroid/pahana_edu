@@ -201,5 +201,9 @@ public class InvoiceService {
     public List<Invoice> getAllInvoices() {
         return invoiceDAO.getAllInvoices();
     }
+    
+    public List<Invoice> getInvoicesStatusNDue() {
+        return invoiceDAO.getInvoicesStatusNDue();
+    }
 }
 
