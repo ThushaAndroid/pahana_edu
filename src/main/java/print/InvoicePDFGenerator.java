@@ -123,7 +123,7 @@ public class InvoicePDFGenerator {
     }
 
     // ✅ Added HttpServletRequest so we can resolve logo path correctly
-    public boolean generateInvoicePDF(HttpServletRequest request, Invoice invoice, List<BillDetail> billDetails, String filePath) {
+    public boolean generateInvoicePDF(HttpServletRequest request, Invoice invoice, List<BillDetail> billDetails, String filePath, String username) {
         Document document = new Document(PageSize.A4);
         try {
             PdfWriter.getInstance(document, new FileOutputStream(filePath));
@@ -149,6 +149,13 @@ public class InvoicePDFGenerator {
             Paragraph company = new Paragraph("Pahana Edu Bookshop", companyFont);
             company.setAlignment(Element.ALIGN_CENTER);
             document.add(company);
+
+            document.add(new Paragraph(" ")); // spacing
+            
+         // Officer name
+            Paragraph officer = new Paragraph("Officer: " + username, new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK));
+            officer.setAlignment(Element.ALIGN_RIGHT);
+            document.add(officer);
 
             document.add(new Paragraph(" ")); // spacing
 

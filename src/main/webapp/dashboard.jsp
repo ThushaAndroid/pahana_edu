@@ -66,6 +66,7 @@
 <title><%= roleName %> Dashboard - Pahana Edu</title>
 <link rel="stylesheet" href="css/dashboardStyle.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     function toggleMenu(menuId) {
@@ -87,6 +88,11 @@
         popup.classList.toggle("open");
     }
     
+    function openSettings() {
+        const popup = document.getElementById("settingsModal");
+        popup.classList.toggle("open");
+    }
+    
     function openHelp() {
         window.location.href = "help.jsp"; 
     }
@@ -101,6 +107,7 @@
         const profilePopup = document.getElementById("profilePopup");
         const menuDropdown = document.getElementById("menuDropdown");
         const notificationPopup = document.getElementById("notificationPopup");
+        const settingsModal = document.getElementById("settingsModal");
 
         if (!event.target.closest("#profilePopup") && !event.target.closest("[title='Profile']")) {
             profilePopup.classList.remove("open");
@@ -111,6 +118,9 @@
         if (!event.target.closest("#notificationPopup") && !event.target.closest("[title='You have <%= notificationCount %> notifications']")) {
             notificationPopup.classList.remove("open");
         }
+        if (!event.target.closest("#settingsModal") && !event.target.closest("[title='Settings']")) {
+        	settingsModal.classList.remove("open");
+        }
 
     });
 </script>
@@ -118,7 +128,7 @@
 <style>
     /* Better toggle handling with CSS class */
     .open { display: block !important; }
-    #profilePopup, #menuDropdown, #notificationPopup, #transactionMenu, #operationMenu, #reportMenu {
+    #profilePopup, #menuDropdown, #notificationPopup, #settingsModal, #transactionMenu, #operationMenu, #reportMenu {
         display: none;
     }
      
@@ -146,7 +156,8 @@
 </button>
            
 
-            <button class="icon-btn" title="Settings">⚙️</button>
+            <!-- <button class="icon-btn" title="Settings">⚙️</button> -->
+            <button class="icon-btn" title="Settings" onclick="openSettings()">⚙️</button>
             <button class="icon-btn" onclick="userProfile()" title="Profile">👤</button>
             <button class="icon-btn" onclick="openHelp()" title="Help">❓</button>
         </div>
@@ -163,7 +174,8 @@
         <span class="notification-badge"><%= notificationCount %></span>
     <% } %>
 </button>
-        <button class="icon-btn" title="Settings">⚙️</button>
+        <!-- <button class="icon-btn" title="Settings">⚙️</button> -->
+        <button class="icon-btn" title="Settings" onclick="openSettings()">⚙️</button>
         <button class="icon-btn" onclick="userProfile()" title="Profile">👤</button>
         <button class="icon-btn" onclick="openHelp()" title="Help">❓</button>
     </div>
@@ -191,7 +203,7 @@
     
     </div> -->
 <div id="transactionMenu" style="padding-left:10px;">
-    <button type="button" class="btn" onclick="openInvoicePopup('InvoiceServlet?action=invoice')">Generate Bill</button>
+    <button type="button" class="btn" onclick="openInvoicePopup('InvoiceServlet?action=invoice&username=<%= username %>')">Generate Bill</button>
 </div>
 
 <script>
@@ -222,7 +234,7 @@ function openInvoicePopup(url) {
     <button onclick="toggleMenu('operationMenu')">Operation</button>
 <div id="operationMenu" style="padding-left:10px;">
     <a href="javascript:void(0)" class="button-link" onclick="openPopup('userRegister.jsp')">Register Users</a>
-    <a href="javascript:void(0)" class="button-link" onclick="openPopup('customerRegister.jsp')">Register Customers</a>
+    <a href="javascript:void(0)" class="button-link" onclick="openPopup('customerRegister.jsp?roleName=<%= roleName %>')">Register Customers</a>
     <a href="javascript:void(0)" class="button-link" onclick="openPopup('addItem.jsp')">Add Items</a>
 </div>
 
@@ -254,7 +266,7 @@ function openPopup(url) {
 
     <button type="button" class="btn" onclick="openPopup('ItemServlet?action=itemReport')">Item Report</button>
 
-    <button type="button" class="btn" onclick="openPopup('InvoiceServlet?action=invoiceReport')">Invoice Report</button>
+    <button type="button" class="btn" onclick="openPopup('InvoiceServlet?action=invoiceReport&username=<%= username %>')">Invoice Report</button>
 <!-- </div> -->
 
 
@@ -423,7 +435,62 @@ function openPopup(url) {
     %>
 </div>
 
+<div id="settingsModal" class="settings-modal">
+  <div class="settings-content">
+    <span class="close-btn" onclick="openSettings()">&times;</span>
+    <h2>⚙️ Settings</h2>
 
+    <form action="UserServlet" method="post">
+        <input type="hidden" name="action" value="updateSettings">
+       <input type="hidden" name="userName" value="<%= username %>">
+
+        <label>Change Password:</label>
+        <input type="password" name="newPassword"><br><br>
+
+        <label>Theme:</label>
+        <select name="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+        </select><br><br>
+
+        <button type="submit" class="save-btn">Save</button>
+    </form>
+  </div>
+</div>
+
+
+
+<script>
+<%
+String error = (String) request.getAttribute("error");
+String message = (String) request.getAttribute("message");
+
+%>
+
+    <% if (error != null) { %>
+    Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'error',
+        title: "<%= error.replace("\"", "\\\"") %>",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true
+    });
+    <% } %>
+
+    <% if (message != null) { %>
+    Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'success',
+        title: "<%= message.replace("\"", "\\\"") %>",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true
+    });
+    <% } %>
+</script>
 
 </body>
 </html>

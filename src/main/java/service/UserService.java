@@ -242,8 +242,14 @@ public class UserService {
         return userDAO.updateUser(user);
     }
     
+    //generate NextUserId
     public String generateNextUserId() {
     return userDAO.generateNextUserId();
+    }
+    
+ // Update user password
+    public boolean changePassword(String userName, String newPassword) {
+        return userDAO.changePassword(userName, newPassword);
     }
 }
 

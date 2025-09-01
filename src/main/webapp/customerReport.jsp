@@ -18,8 +18,9 @@
         }
     }
     
-    String roleName = (String)request.getAttribute("roleName");
-    System.out.println("roleName: " + roleName);
+  /*   String roleName = (String)request.getAttribute("roleName"); */
+       String roleName = request.getParameter("roleName");
+       System.out.println("roleName: " + roleName);
 %>
 
 <!DOCTYPE html>
@@ -108,12 +109,14 @@
         <form action="CustomerServlet" method="get" style="display:inline;">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="accountNumber" value="<%= c.getAccountNumber() %>">
+             <input type="hidden" name="roleName" value=<%= roleName %> />
             <button type="submit" class="action-btn edit-btn">Update</button>
         </form>
         <form action="CustomerServlet" method="post" style="display:inline;" 
               onsubmit="return confirm('Are you sure you want to delete this customer?');">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="accountNumber" value="<%= c.getAccountNumber() %>">
+            <input type="hidden" name="roleName" value=<%= roleName %> />
             <button type="submit" class="action-btn delete-btn">Delete</button>
         </form>
          <% } %>

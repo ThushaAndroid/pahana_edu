@@ -171,4 +171,19 @@ public class UserDAO {
 
         return newUserId;
     }
+    
+    
+    public boolean changePassword(String userName, String newPassword) {
+        String sql = "UPDATE users SET password=? WHERE username=?";
+        try (Connection conn =  DBConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPassword);
+            ps.setString(2, userName);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

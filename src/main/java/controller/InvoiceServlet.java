@@ -145,6 +145,10 @@ public class InvoiceServlet extends HttpServlet {
 //	        System.out.println("roleName: " + roleName);
 //	        // Pass roleName to JSP
 //	        request.setAttribute("roleName", roleName);
+	        
+	        String username = request.getParameter("username"); 
+            System.out.println("username: " + username);
+            request.setAttribute("username", username);
 
 	        // Set attribute and forward to invoice report
 	        request.setAttribute("invoices", invoices);
@@ -320,8 +324,11 @@ public class InvoiceServlet extends HttpServlet {
 	            //boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice, billList, pdfPath);
 	            
 	           // String filePath = request.getServletContext().getRealPath("/invoices/invoice.pdf");
+	            
+	            String username = request.getParameter("username"); 
+	            System.out.println("username: " + username);
 
-	            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(request, invoice, billList, pdfPath);
+	            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(request, invoice, billList, pdfPath, username);
 
 				File pdfFile = new File(pdfPath);
 
@@ -426,9 +433,12 @@ public class InvoiceServlet extends HttpServlet {
 
 		            // Define the full PDF file path
 		            String pdfPath = new File(pdfDir, invoice.getInvoiceNo() + ".pdf").getAbsolutePath();
+		            
+		            String username = request.getParameter("username"); 
+		            System.out.println("username: " + username);
 
 		            //boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(invoice2, billList, pdfPath);
-		            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(request,invoice2, billList, pdfPath);
+		            boolean pdfGenerated = invoicePDFGenerator.generateInvoicePDF(request,invoice2, billList, pdfPath, username);
 
 
 					File pdfFile = new File(pdfPath);
@@ -603,6 +613,11 @@ public class InvoiceServlet extends HttpServlet {
 		if (invoice != null) {
 			 request.setAttribute("invoice", invoice);
 			 request.setAttribute("bill_details", billList);
+			 
+			 String username = request.getParameter("username"); 
+	         System.out.println("username: " + username);
+	         request.setAttribute("username", username);
+	            
 				request.getRequestDispatcher("updateInvoice.jsp").forward(request, response);
 		    } else {
 		        request.setAttribute("error", "Invoice not found");
@@ -625,6 +640,10 @@ public class InvoiceServlet extends HttpServlet {
 	        if (nextInvoiceNo != null && !nextInvoiceNo.isEmpty()) {
 	        // Pass data to JSP
 	        request.setAttribute("invoiceNo", nextInvoiceNo);
+	        
+	        String username = request.getParameter("username"); 
+	         System.out.println("username: " + username);
+	         request.setAttribute("username", username);
 ////	        request.setAttribute("customers", customers);
 //	        request.setAttribute("items", items);
 	        request.getRequestDispatcher("generateInvoice.jsp").forward(request, response);

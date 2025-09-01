@@ -20,6 +20,9 @@
     
   /*   String roleName = (String)request.getAttribute("roleName");
     System.out.println("roleName: " + roleName); */
+    
+    String username = request.getParameter("username"); 
+    System.out.println("username: " + username);
 %>
 
 <!DOCTYPE html>
@@ -101,6 +104,7 @@
         <form action="InvoiceServlet" method="get" style="display:inline;">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="invoiceNo" value="<%= i.getInvoiceNo() %>">
+            <input type="hidden" name="username" value=<%= username %> />
             <button type="submit" class="action-btn edit-btn">Update</button>
         </form>
         <form action="InvoiceServlet" method="post" style="display:inline;" 

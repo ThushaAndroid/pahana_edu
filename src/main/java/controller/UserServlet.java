@@ -92,6 +92,9 @@ public class UserServlet extends HttpServlet {
 			case "update":
 				updateUser(request, response);
 				break;
+			case "updateSettings":
+				changePassword(request, response);
+				break;
 			case "insert":
 			default:
 				insertUser(request, response);
@@ -418,6 +421,44 @@ public class UserServlet extends HttpServlet {
 		        request.setAttribute("error", "Error changing user status: " + e.getMessage());
 		        request.getRequestDispatcher("userReport.jsp").forward(request, response);
 		        System.out.println("Error changing user status: " + e.getMessage());
+		    }
+		}
+		
+		private void changePassword(HttpServletRequest request, HttpServletResponse response) 
+				throws ServletException, IOException {
+		    String userName = request.getParameter("userName");
+		    String newPassword = request.getParameter("newPassword");
+		    
+		    if (userName == null || userName.isEmpty() || newPassword == null || newPassword.isEmpty()) { 
+		    	request.setAttribute("error",
+					  "User is missing!");
+		    System.out.println("User is missing!");
+				
+					  request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+					  return; }
+
+		    try {
+		        
+		       
+		            boolean change = userService.changePassword(userName,newPassword);
+
+		            if (change) {
+		                request.setAttribute("message", "Your password updated successfully!");
+		                System.out.println("Your password updated successfully!");
+		            } else {
+		                request.setAttribute("error", "Failed to update user password.");
+		                System.out.println("Failed to update user password.");
+		            }
+		    
+
+		      
+		        request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        request.setAttribute("error", "Error changing user password: " + e.getMessage());
+		        request.getRequestDispatcher("dashboard.jsp").forward(request, response);
+		        System.out.println("Error changing user password: " + e.getMessage());
 		    }
 		}
 		

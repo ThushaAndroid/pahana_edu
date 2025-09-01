@@ -6,6 +6,9 @@
 <%
     Invoice invoice = (Invoice) request.getAttribute("invoice");
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // For HTML date inputs
+    
+    String username = request.getParameter("username"); 
+    System.out.println("username: " + username);
 %>
 
 <!DOCTYPE html>
@@ -30,6 +33,7 @@
 
     <form action="InvoiceServlet" method="post">
         <input type="hidden" name="action" value="update">
+        <input type="hidden" name="username" value=<%= username %> />
 
         <!-- Invoice No (read-only) -->
         <div class="form-group">

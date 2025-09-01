@@ -176,10 +176,16 @@ public class CustomerServlet extends HttpServlet {
 				request.setAttribute("message", "Customer Registration successful! You can now log in.");
 				System.out.println("Customer Registration successful! You can now log in");
 				
+				 String roleName = request.getParameter("roleName"); 
+			        System.out.println("roleName: " + roleName);
+			        // Pass roleName to JSP
+			        request.setAttribute("roleName", roleName);
+				
 				// Reload updated customer list
 			    List<Customer> customers = customerService.getAllCustomers();
 			    request.setAttribute("customers", customers);
-
+			    
+			   
 			    // Forward to JSP
 			    request.getRequestDispatcher("customerReport.jsp").forward(request, response);
 
@@ -260,6 +266,11 @@ public class CustomerServlet extends HttpServlet {
 			request.setAttribute("message", "Customer update successful!");
 			System.out.println("Customer update successful!");
 			
+			 String roleName = request.getParameter("roleName"); 
+		        System.out.println("roleName: " + roleName);
+		        // Pass roleName to JSP
+		        request.setAttribute("roleName", roleName);
+			
 			// Reload updated customer list
 		    List<Customer> customers = customerService.getAllCustomers();
 		    request.setAttribute("customers", customers);
@@ -309,6 +320,11 @@ public class CustomerServlet extends HttpServlet {
 			        System.out.println("Error deleting customer: " + e.getMessage());
 			    }
 	    }
+	    
+	    String roleName = request.getParameter("roleName"); 
+        System.out.println("roleName: " + roleName);
+        // Pass roleName to JSP
+        request.setAttribute("roleName", roleName);
 
 	    // Reload updated customer list
 	    List<Customer> customers = customerService.getAllCustomers();

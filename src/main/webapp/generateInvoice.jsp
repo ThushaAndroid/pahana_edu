@@ -10,6 +10,9 @@
    /*  List<Customer> customers = (List<Customer>) request.getAttribute("customers"); */
    /* InvoiceService invoiceServices = InvoiceService.getInstance();
     String nextInvoiceNo = invoiceServices.generateNextInvoiceNo(); */
+    
+    String username = request.getParameter("username"); 
+    System.out.println("username: " + username);
 %>
 <!DOCTYPE html>
 <html>
@@ -38,6 +41,7 @@
         <input type="hidden" name="action" value="insert">
           <input type="hidden" id="unitsField" name="units" value="">
            <input type="hidden" id="nic" name="nic">
+            <input type="hidden" name="username" value=<%= username %> />
 
         <div class="form-group">
             <label for="invoiceNo">Invoice No:</label><br>

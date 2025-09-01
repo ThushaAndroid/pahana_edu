@@ -5,6 +5,10 @@
     CustomerService customerService = new CustomerService();
     String nextAccountNumber = customerService.generateNextAccountNumber();
     System.out.println("newAccountNumber "+nextAccountNumber);
+    
+    /* String roleName = (String)request.getAttribute("roleName"); */
+     String roleName = request.getParameter("roleName");
+    System.out.println("roleName: " + roleName);
 %>
 <!DOCTYPE html>
 <html>
@@ -22,7 +26,7 @@
 	 <h3 class="register-title">Register New Customer</h3>
     <form action="CustomerServlet" method="post">
         <input type="hidden" name="action" value="insert" />
-        
+        <input type="hidden" name="roleName" value=<%= roleName %> />
 		<div class="form-group">
         <label for="accountNumber">Account Number:</label><br>
        <!--  <input type="text" id="accountNumber" name="accountNumber" required> -->
